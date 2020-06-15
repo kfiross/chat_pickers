@@ -1,4 +1,4 @@
-library giphy_picker;
+
 
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -20,7 +20,7 @@ class GiphyPicker {
     @required String apiKey,
     String rating = GiphyRating.g,
     String lang = GiphyLanguage.english,
-    Widget title,
+//    Widget title,
     ErrorListener onError,
     bool showPreviewPage = true,
     String searchText = 'Search GIPHY',

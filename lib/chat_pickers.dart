@@ -9,6 +9,8 @@ import 'src/emoji_picker/emoji_picker.dart';
 import 'src/giphy_picker/giphy_picker.dart';
 import 'src/hooks/use_page_controller.dart';
 
+export 'src/emoji_picker/emoji_picker.dart';
+export 'src/giphy_picker/giphy_picker.dart';
 
 class EmojiPickerConfig {
 
@@ -110,7 +112,7 @@ class ChatPickers extends HookWidget {
       {Key key,
       this.chatController,
       this.emojiPickerConfig,
-      this.giphyPickerConfig
+      @required this.giphyPickerConfig
       })
       : super(key: key);
 

@@ -1,5 +1,3 @@
-library emoji_picker;
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';

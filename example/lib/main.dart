@@ -1,11 +1,9 @@
-import 'dart:io';
-
 import 'package:bubble/bubble.dart';
 import 'package:chat_pickers/chat_pickers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:giphy_client/src/models/gif.dart';
+import 'package:giphy_client/giphy_client.dart';
 import 'package:image_ink_well/image_ink_well.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
@@ -350,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
 
   Widget buildData(BuildContext context, List<Message> messages) {
     messages = messages?.reversed?.toList();
-    DateTime lastDateTime = messages[0].time;
+    DateTime lastDateTime = messages[0]?.time;
     bool first = true;
 
     return Expanded(
