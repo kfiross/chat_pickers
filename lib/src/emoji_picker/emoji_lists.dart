@@ -1,5 +1,5 @@
 /// Map of all possible emojis along with their names in [Category.SMILEYS]
-final Map<String, String> smileys = new Map.fromIterables([
+final Map<String, String> smileys = Map.fromIterables([
   'Grinning Face',
   'Grinning Face With Big Eyes',
   'Grinning Face With Smiling Eyes',

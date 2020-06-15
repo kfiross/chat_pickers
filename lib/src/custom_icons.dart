@@ -9,16 +9,16 @@
 ///   fonts:
 ///    - family:  Custom
 ///      fonts:
-///       - asset: fonts/CustomIcons.ttf
+///       - asset: fonts/Custom.ttf
 ///
 /// 
 ///
 import 'package:flutter/widgets.dart';
 
-class CustomIcons {
-  CustomIcons._();
+class Custom {
+  Custom._();
 
-  static const _kFontFam = 'CustomIcons';
+  static const _kFontFam = 'Custom';
   static const _kFontPkg = null;
 
   static const IconData remove_char = IconData(0xe800, fontFamily: _kFontFam, fontPackage: _kFontPkg);

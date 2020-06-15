@@ -1,11 +1,13 @@
 library chat_pickers;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:giphy_client/giphy_client.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
-import 'src/custom_icons.dart';
 import 'src/emoji_picker/emoji_picker.dart';
 import 'src/giphy_picker/giphy_picker.dart';
+import 'src/hooks/use_page_controller.dart';
 
 
 class EmojiPickerConfig {
@@ -84,17 +86,22 @@ class GiphyPickerConfig {
   ///
   final String searchText;
 
+  ///
+  Function(GiphyGif) onSelected;
+
   GiphyPickerConfig(
       {@required this.apiKey,
       this.rating,
       this.lang,
       this.title,
       this.onError,
+      this.onSelected,
       this.showPreviewPage,
       this.searchText});
+
 }
 
-class ChatPickers extends StatefulWidget {
+class ChatPickers extends HookWidget {
   final TextEditingController chatController;
   final EmojiPickerConfig emojiPickerConfig;
   final GiphyPickerConfig giphyPickerConfig;
@@ -108,43 +115,11 @@ class ChatPickers extends StatefulWidget {
       : super(key: key);
 
   @override
-  _ChatPickersState createState() => _ChatPickersState();
-}
-
-class _ChatPickersState extends State<ChatPickers>
-    with SingleTickerProviderStateMixin {
-  PageController _pageController;
-  TabController _tabController;
-  int _tabSelected = 0;
-  bool _isKeyboardOpen = false;
-
-  final _tabs = [
-    Tab(icon: Icon(Icons.insert_emoticon)),
-    Tab(icon: Icon(MdiIcons.gif)),
-    //Tab(icon: Icon(MdiIcons.sticker)),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    // _tabController = TabController(length: _tabs.length, vsync: this);
-    _pageController = PageController(keepPage: true);
-    _pageController.addListener(() {
-      setState(() {
-        _tabSelected = _pageController.page.toInt();
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    //_tabController.dispose();
-    _pageController.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    var _tabSelected = useState<int>(0);
+    PageController _pageController = usePageController(_tabSelected);
+
+
     Widget gifKeyboard() {
       return GiphyPicker.pickerGifWidget(
           context: context,
@@ -157,6 +132,7 @@ class _ChatPickersState extends State<ChatPickers>
             // todo: upload gif to chat
             ///_uploadGif(gif.images.original.url);
 
+            giphyPickerConfig.onSelected(gif);
 
             // show back keyboard
             FocusScope.of(context).unfocus(); //?
@@ -165,18 +141,18 @@ class _ChatPickersState extends State<ChatPickers>
 
     Widget buildSticker() {
       return EmojiPicker(
+        //context: context,
         rows: 150,
-        columns: widget.emojiPickerConfig.columns,
+        columns: emojiPickerConfig.columns,
         buttonMode: ButtonMode.MATERIAL,
-        recommendKeywords: widget.emojiPickerConfig.recommendKeywords,
-        numRecommended: widget.emojiPickerConfig.numRecommended,
-        bgBarColor: widget.emojiPickerConfig.bgBarColor,
-        //Colors.black38,
-        bgColor: widget.emojiPickerConfig.bgColor,
-        indicatorColor: widget.emojiPickerConfig.indicatorColor,
+        recommendKeywords: emojiPickerConfig.recommendKeywords,
+        numRecommended: emojiPickerConfig.numRecommended,
+        bgBarColor: emojiPickerConfig.bgBarColor,
+        bgColor: emojiPickerConfig.bgColor,
+        indicatorColor: emojiPickerConfig.indicatorColor,
         onEmojiSelected: (emoji, category) {
           // setState(() {
-          widget.chatController.text += emoji.emoji;
+          chatController.text += emoji.emoji;
           //});
 
           // print(_messageText);
@@ -193,7 +169,7 @@ class _ChatPickersState extends State<ChatPickers>
     ];
 
     return Container(
-      color: widget.emojiPickerConfig.bgBarColor,
+      color: emojiPickerConfig.bgBarColor,
       child: Column(
         children: <Widget>[
           Expanded(
@@ -212,7 +188,7 @@ class _ChatPickersState extends State<ChatPickers>
                   children: <Widget>[
                     IconButton(
                       color:
-                          _tabSelected == 0 ? Colors.white : Colors.grey[500],
+                          _tabSelected.value == 0 ? Colors.white : Colors.grey[500],
                       icon: Icon(Icons.insert_emoticon),
                       onPressed: () {
                         _pageController.animateToPage(0,
@@ -222,7 +198,7 @@ class _ChatPickersState extends State<ChatPickers>
                     ),
                     IconButton(
                       color:
-                          _tabSelected == 1 ? Colors.white : Colors.grey[500],
+                          _tabSelected.value == 1 ? Colors.white : Colors.grey[500],
                       icon: Icon(MdiIcons.gif),
                       onPressed: () {
                         _pageController.animateToPage(1,
@@ -268,15 +244,17 @@ class _ChatPickersState extends State<ChatPickers>
                         color: Colors.transparent,
                         child: InkWell(
                           child: Icon(
-                            CustomIcons.remove_char,
+                            MdiIcons.backspace,
                             size: 18,
                             color: Colors.white,
                           ),
                           onTap: () {
-                            if (widget.chatController.text.isNotEmpty)
-                              widget.chatController.text =
-                                  widget.chatController.text.substring(
-                                      0, widget.chatController.text.length - 2);
+                            try{
+                              chatController.text = chatController.text.substring(0, chatController.text.length - 2);
+                            }
+                            catch (e){
+                              chatController.clear();
+                            }
                           },
                         ),
                       ),
