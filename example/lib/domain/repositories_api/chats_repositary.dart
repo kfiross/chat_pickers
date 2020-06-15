@@ -9,4 +9,6 @@ abstract class ChatsRepository {
 
   Future<List<Message>> fetchAllChatMessages(String chatId,
       {Duration difference = const Duration()});
+
+  Future<List<Message>> addMessage(chatId, Message message);
 }

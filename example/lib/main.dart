@@ -5,6 +5,7 @@ import 'package:chat_pickers/chat_pickers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:giphy_client/src/models/gif.dart';
 import 'package:image_ink_well/image_ink_well.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Chat app demo',
       theme: ThemeData(
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
@@ -69,10 +70,6 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
   bool _isShowSticker = false;
 
   var _imageUrl;
-  var _messages = <Message>[
-    TextMessage(text: "me too honey!", time: DateTime(2020, 4, 21, 16, 31), senderId: "myId"),
-    TextMessage(text: "I miss u!!", time: DateTime(2020, 4, 21, 16, 30), senderId: "otherId"),
-  ];
   String _chatUid;
   bool _isBlocked = false;
   bool _first;
@@ -80,17 +77,6 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
   String _nextUid;
   int _prevPos;
   bool _isRTL = false;
-
-  bool _showGifKeyboard = false;
-
-  var _options = [
-    "View contact",
-    "Media,links and docs",
-    "Search",
-    "Mute Notification",
-    "Wallpaper",
-    "More",
-  ];
 
   // for state management
   ChatsStore _chatStore;
@@ -114,11 +100,9 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
     _animationController = AnimationController(vsync: this, duration: Duration(milliseconds: 500));
 
     _chatController.addListener(() {
-      if(_chatController.text.isEmpty)
-        _animationController.forward();
-      else
-        _animationController.reverse();
+        setState(() {
 
+        });
     });
 
   }
@@ -138,34 +122,10 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
 
     _chatStore.getMessages("chatId");
 
-    //   _isRTL = Provider.of<AppLanguage>(context).isRTL();
-
-//    FBDatabase().listenReference(
-//      path: "users/${widget.otherUid}/profilePic",
-//      onData: ((snapshot) {
-//        var partUrl = snapshot.value;
-//
-//        try {
-//          _imageUrl = '${Constants.MY_FIREBASE_STORAGE_PRE_URL}$partUrl';
-//        } catch (e) {
-//          print("no image url");
-//        }
-//
-//        FBDatabase().listenReference(
-//          path: 'matches/users/${widget.myUid}/${widget.otherUid}',
-//          onData: ((snapshot) {
-//            setState(() {
-//              _isBlocked = !snapshot.value;
-//            });
-//          }),
-//        );
-//      }),
-//    );
   }
 
   @override
   void dispose() {
-    //    _chatBloc.close();
     _disposers.forEach((disposer) => disposer());
     super.dispose();
   }
@@ -173,25 +133,21 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
   void _handleSubmit() {
     final text =  _chatController.text;
 
-//    String content = text.trim();
-//    _chatController.clear();
-//
-//    if (content.isEmpty) return;
-//
-//    TextMessage message = TextMessage(
-//      text: content,
-//      senderId: widget.myUid,
-//      time: DateTime.now().subtract(widget.difference),
-//    );
-//
-//    setState(() {
-//      //_messages.insert(0, message);
-//    });
-//
-//    var ref = FBDatabase().getReference("chats/$_chatUid");
-//    var key = ref.push().key;
-//    ref.update({"$key": message.toJson()});
+    String content = text.trim();
+    _chatController.clear();
+
+    if (content.isEmpty) return;
+
+    TextMessage message = TextMessage(
+      text: content,
+      senderId: widget.myUid,
+      time: DateTime.now(),
+    );
+
+    _chatStore.addMessage(message);
   }
+
+
 
   _buildTextMessage(TextMessage message, bool isMe) {
     return Row(
@@ -199,41 +155,9 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
           ? (_isRTL) ? MainAxisAlignment.start : MainAxisAlignment.end
           : (_isRTL) ? MainAxisAlignment.end : MainAxisAlignment.start,
       children: <Widget>[
-//        Container(
-//          margin: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-//          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0),
-//          //width: MediaQuery.of(context).size.width * 0.5,
-//          decoration: BoxDecoration(
-//            color: isMe ? AppColors.colorPrimary : Colors.white,
-//            borderRadius: BorderRadius.circular(25),
-//          ),
-//          child: Column(
-//            crossAxisAlignment: isMe
-//                ? (_isRTL) ? CrossAxisAlignment.start : CrossAxisAlignment.end
-//                : (_isRTL) ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-//            children: <Widget>[
-//              Text(
-//                message.text,
-//                style: TextStyle(
-//                  color: (isMe) ? Colors.white : AppColors.colorPrimary,
-//                  fontSize: 16.0,
-//                ),
-//              ),
-//              SizedBox(height: 8.0),
-//              Text(
-//                message.time == null ? "" : getInDayDate(message.time),
-//                textAlign: (isMe) ? TextAlign.left : TextAlign.right,
-//                style: TextStyle(
-//                  color: (isMe) ? Colors.white : Colors.black,
-//                  fontSize: 14.0,
-//                  fontWeight: FontWeight.w800,
-//                ),
-//              ),
-//            ],
-//          ),
-//        ),
+
         Bubble(
-          margin: BubbleEdges.only(top: 10, bottom: 10),
+          margin: BubbleEdges.only(top: 7, bottom: 7),
           alignment: Alignment.topRight,
           nip: isMe ? BubbleNip.rightTop : BubbleNip.leftTop,
           color: isMe ? Color.fromRGBO(225, 255, 199, 1.0): Colors.white,
@@ -266,19 +190,19 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
   }
 
   _buildPhotoMessage(PhotoMessage message, bool isMe) {
+
     return Row(
       mainAxisAlignment: isMe
           ? (_isRTL) ? MainAxisAlignment.start : MainAxisAlignment.end
           : (_isRTL) ? MainAxisAlignment.end : MainAxisAlignment.start,
+
       children: <Widget>[
-        Container(
-          margin: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-          width: 180,
-          decoration: BoxDecoration(
-            color: isMe ? AppColors.colorPrimary : Colors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
+
+        Bubble(
+          margin: BubbleEdges.only(top: 7, bottom: 7),
+          alignment: Alignment.topRight,
+          nip: isMe ? BubbleNip.rightTop : BubbleNip.leftTop,
+          color: isMe ? Color.fromRGBO(225, 255, 199, 1.0): Colors.white,
           child: Column(
             crossAxisAlignment: isMe
                 ? (_isRTL) ? CrossAxisAlignment.start : CrossAxisAlignment.end
@@ -329,28 +253,42 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
                   },
                 ),
               ),
-              SizedBox(height: 8.0),
-              Text(
-                message.time == null ? "" : getInDayDate(message.time),
-                textAlign: (isMe) ? TextAlign.left : TextAlign.right,
-                style: TextStyle(
-                  color: (isMe) ? Colors.white : Colors.black,
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.w800,
-                ),
+              SizedBox(height: 6),
+              Row(
+                crossAxisAlignment:
+                CrossAxisAlignment.end,
+//                : (_isRTL) ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                children: <Widget>[
+//              Text(
+//                message.text,
+//                style: TextStyle(
+//                  color: Colors.black,
+//                  fontSize: 17.0,
+//                ),
+//              ),
+                  SizedBox(width: 8.0),
+                  Text(
+                    message.time == null ? "" : getInDayDate(message.time),
+                    textAlign: (isMe) ? TextAlign.left : TextAlign.right,
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 13.0,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
         ),
       ],
     );
+
   }
 
   _buildDateDivider(Message message) {
     return Stack(
       alignment: Alignment.center,
       children: <Widget>[
-//        Divider(color: Colors.grey[600], thickness: 1),
         Bubble(
           alignment: Alignment.center,
           color: Color.fromRGBO(212, 234, 244, 1.0),
@@ -371,46 +309,11 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
       msg = _buildPhotoMessage(message, isMe);
 //      deleteMessageTitle = AppLocalizations().translate("delete_photo");
     }
+
     final msg2 = InkWell(
       child: msg,
       onLongPress: () {
-//        var dialog = AlertDialog(
-//          title: Text(deleteMessageTitle),
-//          actions: <Widget>[
-//            Container(
-//              width: MediaQuery.of(context).size.width * 0.7,
-//              child: Row(
-//                crossAxisAlignment: CrossAxisAlignment.center,
-//                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//                children: <Widget>[
-//                  FlatButton(
-//                    child: Text(
-//                        AppLocalizations().translate("delete_for_me")),
-//                    onPressed: () {},
-//                  ),
-//                  FlatButton(
-//                      child:
-//                      Text(AppLocalizations().translate("cancel")),
-//                      onPressed: () {
-//                        Navigator.of(context).pop();
-//                      }),
-//                  isMe
-//                      ? FlatButton(
-//                    child: Text(
-//                        AppLocalizations().translate("destroy")),
-//                    onPressed: () {},
-//                  )
-//                      : Container(),
-//                ],
-//              ),
-//            ),
-//          ],
-//        );
-//
-//        showDialog(
-//            useRootNavigator: false,
-//            context: context,
-//            builder: (context) => dialog);
+
       },
     );
 
@@ -443,46 +346,10 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
       }
     });
   }
-//  Widget body(BuildContext context) {
-//    return BlocBuilder(
-//      bloc: _chatBloc,
-//      builder: (context, state) {
-//        if (state is InitialChatsState) return Expanded(child: Container());
-//        if (state is LoadingState) {
-//          return buildLoader();
-//        }
-////        else if (state is LoadedListState) {
-////          if (state.messages == null || state.messages.isEmpty) {
-////            return _buildEmptyMessage();
-////          }
-////          _messages = state.messages;
-////          _nextUid = state.nextUid;
-////          _prevPos = state.lastMessagePos;
-////          return buildData(context, state.messages, false);
-////        }
-//        else if (state is FinishedLoadingListState) {
-//          if (state.messages == null || state.messages.isEmpty) {
-//            return _buildEmptyMessage();
-//          }
-//          _messages = state.messages;
-//          return buildData(context, state.messages, true);
-//        } else if (state is AddedNewMessageState) {
-//          if (_messages == null || _messages.isEmpty)
-//            _messages = [state.message];
-//          else if (state.message.time !=
-//              _messages[0].time) // weird bug duplicate when strokes keys
-//            _messages.insert(0, state.message);
-//          return buildData(context, _messages, true);
-//        }
-//        // if (state is MatchesErrorState)
-//        return Container();
-//
-//        ///buildErrorOutput((state as MatchesErrorState).message);
-//      },
-//    );
-//  }
+
 
   Widget buildData(BuildContext context, List<Message> messages) {
+    messages = messages?.reversed?.toList();
     DateTime lastDateTime = messages[0].time;
     bool first = true;
 
@@ -654,14 +521,6 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
                     ),
                   ),
                 ),
-//                IconButton(
-//                  icon: Icon(Icons.send),
-//                  iconSize: 25.0,
-//                  color: AppColors.colorPrimaryDark,
-//                  onPressed:
-//                  canSend ? () => _handleSubmit(_chatController.text) : null,
-//                ),
-
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Row(
@@ -706,78 +565,8 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
           onPressed: _chatController.text.isNotEmpty? _handleSubmit : null,
         ),
 
-//        RoundIconButton(
-//          backgroundColor: Colors.grey[600],
-//          size: 50,
-//          icon: _chatController.text.isEmpty
-//              ? Icon(Icons.mic, color: Colors.white)
-//              : Icon(Icons.send, color: Colors.white, size: 20,),
-//          iconSize: ,
-//
-
-//        child: AnimatedIcon(
-//          icon: AnimatedIcons.pause_play,
-//          color: Colors.white,
-//          progress: _animationController,
-//        )
-//        ),
       ],
     );
-  }
-
-  _uploadImageChatToStorage(File file) async {
-    if (file == null) return;
-
-    /// create key for new ref in database
-//    var chatRef = FBDatabase().getReference("chats/$_chatUid");
-//    var key = chatRef.push().key;
-
-    /// upload the downloaded image to FirebaseStorage
-//    var ref = FBStorage().getReference("images/chats/$_chatUid/$key.png");
-//
-//
-//    var snapshot =
-//    await FBStorage().putFile("images/chats/$_chatUid/$key.png", file);
-
-    /// after uploaded completed, save image url in user's photos
-//    String downloadUrl = await snapshot.ref.getDownloadURL();
-
-    /// check if photo include nudity
-//    var result = await ImageDetection.detectNSFW(imageUrl: downloadUrl);
-//    if (result) {
-//      // remove detected image from firebase
-//      await ref.delete();
-//
-//      // throw exception to notify user
-//      throw NudeImageException();
-//    }
-
-//    PhotoMessage message = PhotoMessage(
-//      url: downloadUrl,
-//      senderId: widget.myUid,
-//      time: DateTime.now().subtract(widget.difference),
-//    );
-//
-//    chatRef.update({key: message.toJson()});
-//
-//    setState(() {});
-  }
-
-  _uploadGif(String gifUrl) {
-    /// create key for new ref in database
-//    var chatRef = FBDatabase().getReference("chats/$_chatUid");
-//    var key = chatRef.push().key;
-//
-//    PhotoMessage message = PhotoMessage(
-//      url: gifUrl,
-//      senderId: widget.myUid,
-//      isGif: true,
-//      time: DateTime.now().subtract(widget.difference),
-//    );
-//
-//    chatRef.update({key: message.toJson()});
-//
-//    setState(() {});
   }
 
   @override
@@ -797,9 +586,7 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
             color: Colors.grey[900],
             child: Column(
               children: <Widget>[
-                _messages==null || _messages.isEmpty
-                    ? Expanded(child: Container(color: Colors.grey[900]))
-                    : body(context),
+                body(context),
                 Container(
                     color: Colors.grey[900],
                     child: _buildMessageComposer()),
@@ -818,6 +605,10 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
                       ),
                       giphyPickerConfig: GiphyPickerConfig(
                           apiKey: "q3KulxGCIKWrOU283I3xM3DWvMnO5zOV",
+                          onSelected: (gif){
+                            _addGifMessage(gif);
+                          }
+
                       ),
                     ),
                   ),
@@ -885,11 +676,22 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
             ],
           ),
           onTap: (){
-            Navigator.pop(context);
+       ///     Navigator.pop(context);
           },
         ),
       ),
     );
+  }
+
+  void _addGifMessage(GiphyGif gif) {
+    PhotoMessage message = PhotoMessage(
+      isGif: true,
+      url: gif.images.original.url,
+      senderId: widget.myUid,
+      time: DateTime.now(),
+    );
+
+    _chatStore.addMessage(message);
   }
 }
 

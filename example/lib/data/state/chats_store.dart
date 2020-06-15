@@ -14,6 +14,8 @@ enum StoreState {initial, loading, loaded }
 abstract class _ChatsStore with Store{
   //final ChatsRepository _chatsRepository = ChatsRepositoryImpl();
 
+  bool _first = false;
+
   final ChatsRepository _chatsRepository;
   _ChatsStore(this._chatsRepository);
 
@@ -32,9 +34,11 @@ abstract class _ChatsStore with Store{
       return StoreState.initial;
     }
     else if(_messagesFuture.status == FutureStatus.pending){
-      return StoreState.loading;
+      return _first ? StoreState.loading : StoreState.loaded;
     }
     else if(_messagesFuture.status == FutureStatus.fulfilled){
+      if(_first)
+        _first = false;
       return StoreState.loaded;
     }
 
@@ -54,5 +58,18 @@ abstract class _ChatsStore with Store{
       errorMessage = "Could not load chat";
     }
 
+  }
+
+  @action
+  Future addMessage(Message message) async{
+    try{
+      errorMessage = null;
+      var result = _chatsRepository.addMessage("chatId", message);
+      _messagesFuture = ObservableFuture(result);
+      messages = await _messagesFuture;
+    }
+    on Exception{
+      errorMessage = "Could not add message";
+    }
   }
 }

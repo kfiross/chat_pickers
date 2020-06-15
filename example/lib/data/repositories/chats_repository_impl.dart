@@ -53,40 +53,9 @@ class ChatsRepositoryImpl extends ChatsRepository {
 
     var snapshot = (db["chat"] as Map)[chatId] as List<Message>;
 
-    return snapshot.reversed.toList();
+    result.addAll(snapshot);
+    return result;
 
-//    var snapshot = await FBDatabase().getSnapshot("chats/$chatId");
-//
-//
-//    var children = snapshot.value;
-//
-//    if(children == null)
-//      return result;
-//
-//    var keys2 = children.keys.toList()..sort();
-//
-//    keys2.forEach((key) {
-//      try {
-//        TextMessage message = TextMessage.fromMap(children[key]);
-//        // fix hour to localtime
-//        message.time = message.time.add(difference);
-//
-//        result.add(message);
-//      } on ConvertException catch (_) {}
-//
-//      //
-//      try {
-//        PhotoMessage message = PhotoMessage.fromMap(children[key]);
-//        // fix hour to localtime
-//        message.time = message.time.add(difference);
-//
-//        result.add(message);
-//      } on ConvertException catch (_) {}
-//    });
-//
-//    result = result.reversed.toList();
-
-//    return result;
   }
 
   Future<Message> fetchLastChatMessages(String chatId) async{
@@ -97,39 +66,21 @@ class ChatsRepositoryImpl extends ChatsRepository {
 
     return snapshot.last;
 
-//    var snapshot = await FBDatabase().getSnapshot("chats/$chatId");
-//
-//    var result = <Message>[];
-//
-//    var children = snapshot.value;
-//
-//    if(children == null)
-//      return null;
-//
-//    List keys2 = children.keys.toList()..sort();
-//
-//    var lastKey = keys2.last;
-//
-////    keys2.forEach((key) {
-//      try {
-//        TextMessage message = TextMessage.fromMap(children[lastKey]);
-//        // fix hour to localtime
-//        //message.time = message.time.add(difference);
-//
-//        result.add(message);
-//      } on ConvertException catch (_) {}
-//
-//      //
-//      try {
-//        PhotoMessage message = PhotoMessage.fromMap(children[lastKey]);
-//        // fix hour to localtime
-//        // message.time = message.time.add(difference);
-//
-//        return message;
-//      } on ConvertException catch (_) {}
-////    });
-//
-//    return null; //?
+  }
+
+  @override
+  Future<List<Message>> addMessage(chatId, Message message) async {
+
+    var result = <Message>[];
+
+    await Future.delayed(Duration(seconds: 1));
+
+    var snapshot = (db["chat"] as Map)[chatId] as List<Message>;
+    snapshot.add(message);
+
+    result.addAll(snapshot);
+
+    return result;
   }
 }
 
