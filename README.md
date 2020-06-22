@@ -3,6 +3,7 @@
 A Flutter package that provides a Keyboard widget for using Emojis and gifs.
 
 Heavily based on the awesome(!) packages:
+
 [giphy_picker](https://pub.dev/packages/giphy_picker)<br>
 [emoji_picker](https://pub.dev/packages/emoji_picker)
 
@@ -47,7 +48,6 @@ configuration to customize the look & behaviour of the gif page
 GiphyPickerConfig(
     apiKey: <Your Giphy API key>,
     lang : "EN",
-    title: "Search gifs",
     onError: (error) => print(error),
     onSelected: (gif) => sendGif(gif),
     showPreviewPage: true/false,
