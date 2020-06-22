@@ -7,6 +7,8 @@ import 'emoji_lists.dart' as emojiList;
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'search.dart';
+
 /// All the possible categories that [Emoji] can be put into
 ///
 /// All [Category] are shown in the keyboard bottombar with the exception of [Category.RECOMMENDED]
@@ -63,9 +65,7 @@ class EmojiPicker extends StatefulWidget {
   final Color indicatorColor;
 
   static const Color _defaultBgColor = const Color.fromRGBO(242, 242, 242, 1);
-
-  /// A list of keywords that are used to provide the user with recommended emojis in [Category.RECOMMENDED]
-  final List<String> recommendKeywords;
+  
 
   /// The maximum number of emojis to be recommended
   final int numRecommended;
@@ -95,7 +95,6 @@ class EmojiPicker extends StatefulWidget {
     this.rows = 3,
     this.bgColor = _defaultBgColor,
     this.indicatorColor = Colors.blue,
-    this.recommendKeywords,
     this.numRecommended = 10,
     this.noRecommendationsText = "No Recommendations",
     this.noRecommendationsStyle =
@@ -136,17 +135,22 @@ class _EmojiPickerState extends State<EmojiPicker> {
 
   bool loaded = false;
 
+  /// A list of keywords that are used to provide the user with recommended emojis in [Category.RECOMMENDED]
+  List<String> recommendKeywords = [];
+
+  List<Widget> _recommendedPages = [];
+
   @override
   void initState() {
     super.initState();
 
 //    if (selectedCategory == null) {
-//      if (widget.recommendKeywords == null) {
+//      if (recommendKeywords == null) {
 //        selectedCategory = Category.SMILEYS;
 //      } else {
 //        selectedCategory = Category.RECOMMENDED;
 //      }
-//    } else if (widget.recommendKeywords == null &&
+//    } else if (recommendKeywords == null &&
 //        selectedCategory == Category.RECOMMENDED) {
 //      selectedCategory = Category.SMILEYS;
 //    }
@@ -204,6 +208,125 @@ class _EmojiPickerState extends State<EmojiPicker> {
     return newMap;
   }
 
+  updateRecommededdEmojies(){
+    List<Recommended> recommendedEmojis = List();
+    _recommendedPages.clear();
+
+    if (recommendKeywords != null) {
+
+
+      Widget recommedneedPageResults;
+      if (recommendedEmojis.length != 0) {
+        recommedneedPageResults = Container(
+          color: widget.bgColor,
+          child: GridView.count(
+            shrinkWrap: true,
+            primary: true,
+            crossAxisCount: widget.columns,
+            children: List.generate(recommendedEmojis.length, (index) {
+              if (index < recommendedEmojis.length) {
+                switch (widget.buttonMode) {
+                  case ButtonMode.MATERIAL:
+                    return Center(
+                        child: FlatButton(
+                          padding: EdgeInsets.all(0),
+                          child: Center(
+                            child: Text(
+                              recommendedEmojis[index].emoji,
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: () {
+                            Recommended recommended = recommendedEmojis[index];
+                            widget.onEmojiSelected(
+                                Emoji(
+                                    name: recommended.name,
+                                    emoji: recommended.emoji),
+                                selectedCategory);
+                            addRecentEmoji(Emoji(
+                                name: recommended.name, emoji: recommended.emoji));
+                          },
+                        ));
+                    break;
+                  case ButtonMode.CUPERTINO:
+                    return Center(
+                        child: CupertinoButton(
+                          pressedOpacity: 0.4,
+                          padding: EdgeInsets.all(0),
+                          child: Center(
+                            child: Text(
+                              recommendedEmojis[index].emoji,
+                              style: TextStyle(fontSize: 24),
+                            ),
+                          ),
+                          onPressed: () {
+                            Recommended recommended = recommendedEmojis[index];
+                            widget.onEmojiSelected(
+                                Emoji(
+                                    name: recommended.name,
+                                    emoji: recommended.emoji),
+                                selectedCategory);
+                            addRecentEmoji(Emoji(
+                                name: recommended.name, emoji: recommended.emoji));
+                          },
+                        ));
+
+                    break;
+                  default:
+                    return Container();
+                    break;
+                }
+              } else {
+                return Container();
+              }
+            }),
+          ),
+        );
+      }
+      else {
+        recommedneedPageResults = Container(
+            color: widget.bgColor,
+            child: Center(
+                child: Text(
+                  widget.noRecommendationsText,
+                  style: widget.noRecommendationsStyle,
+                )));
+      }
+//      var recommedneedPage = Column(
+//        children: <Widget>[
+//          Expanded(child: recommedneedPageResults),
+//         (onSearch: (keyword) {
+//
+//
+////            updateRecommededdEmojies();
+//          },)
+//        ],
+//      );
+
+
+      _recommendedPages.add(Container(child: EmojiSearchView(
+        allEmojis: allEmojis,
+        allNames: allNames,
+        numRecommended: widget.numRecommended,
+        buttonMode: widget.buttonMode,
+        onEmojiSelected: widget.onEmojiSelected,
+        addRecentEmoji: addRecentEmoji,
+        selectedCategory: selectedCategory,
+        bgColor: widget.bgColor,
+        columns: widget.columns,
+      )));
+
+      if(pages.isNotEmpty)
+        setState(() {
+          pages[0] = _recommendedPages[0];
+        });
+      else{
+        pages.add(_recommendedPages[0]);
+      }
+
+    }
+  }
+
   Future updateEmojis() async {
     smileyMap = await getAvailableEmojis(emojiList.smileys);
     animalMap = await getAvailableEmojis(emojiList.animals);
@@ -214,6 +337,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
     symbolMap = await getAvailableEmojis(emojiList.symbols);
     flagMap = await getAvailableEmojis(emojiList.flags);
 
+    allNames.clear();
     allNames.addAll(smileyMap.keys);
     allNames.addAll(animalMap.keys);
     allNames.addAll(foodMap.keys);
@@ -233,190 +357,203 @@ class _EmojiPickerState extends State<EmojiPicker> {
     allEmojis.addAll(flagMap.values);
 
 
-    List<_Recommended> recommendedEmojis = List();
-    List<Widget> recommendedPages = List();
 
-    if (widget.recommendKeywords != null) {
-      allNames.forEach((name) {
-        int numSplitEqualKeyword = 0;
-        int numSplitPartialKeyword = 0;
 
-        widget.recommendKeywords.forEach((keyword) {
-          if (name.toLowerCase() == keyword.toLowerCase()) {
-            recommendedEmojis.add(_Recommended(
-                name: name, emoji: allEmojis[allNames.indexOf(name)], tier: 1));
-          } else {
-            List<String> splitName = name.split(" ");
+//    if (recommendKeywords != null) {
+//      allNames.forEach((name) {
+//        int numSplitEqualKeyword = 0;
+//        int numSplitPartialKeyword = 0;
+//
+//        recommendKeywords.forEach((keyword) {
+//          if (name.toLowerCase() == keyword.toLowerCase()) {
+//            recommendedEmojis.add(_Recommended(
+//                name: name, emoji: allEmojis[allNames.indexOf(name)], tier: 1));
+//          } else {
+//            List<String> splitName = name.split(" ");
+//
+//            splitName.forEach((splitName) {
+//              if (splitName.replaceAll(":", "").toLowerCase() ==
+//                  keyword.toLowerCase()) {
+//                numSplitEqualKeyword += 1;
+//              } else if (splitName
+//                  .replaceAll(":", "")
+//                  .toLowerCase()
+//                  .contains(keyword.toLowerCase())) {
+//                numSplitPartialKeyword += 1;
+//              }
+//            });
+//          }
+//        });
+//
+//        if (numSplitEqualKeyword > 0) {
+//          if (numSplitEqualKeyword == name.split(" ").length) {
+//            recommendedEmojis.add(_Recommended(
+//                name: name, emoji: allEmojis[allNames.indexOf(name)], tier: 1));
+//          } else {
+//            recommendedEmojis.add(_Recommended(
+//                name: name,
+//                emoji: allEmojis[allNames.indexOf(name)],
+//                tier: 2,
+//                numSplitEqualKeyword: numSplitEqualKeyword,
+//                numSplitPartialKeyword: numSplitPartialKeyword));
+//          }
+//        } else if (numSplitPartialKeyword > 0) {
+//          recommendedEmojis.add(_Recommended(
+//              name: name,
+//              emoji: allEmojis[allNames.indexOf(name)],
+//              tier: 3,
+//              numSplitPartialKeyword: numSplitPartialKeyword));
+//        }
+//      });
+//
+//      recommendedEmojis.sort((a, b) {
+//        if (a.tier < b.tier) {
+//          return -1;
+//        } else if (a.tier > b.tier) {
+//          return 1;
+//        } else {
+//          if (a.tier == 1) {
+//            if (a.name.split(" ").length > b.name.split(" ").length) {
+//              return -1;
+//            } else if (a.name.split(" ").length < b.name.split(" ").length) {
+//              return 1;
+//            } else {
+//              return 0;
+//            }
+//          } else if (a.tier == 2) {
+//            if (a.numSplitEqualKeyword > b.numSplitEqualKeyword) {
+//              return -1;
+//            } else if (a.numSplitEqualKeyword < b.numSplitEqualKeyword) {
+//              return 1;
+//            } else {
+//              if (a.numSplitPartialKeyword > b.numSplitPartialKeyword) {
+//                return -1;
+//              } else if (a.numSplitPartialKeyword < b.numSplitPartialKeyword) {
+//                return 1;
+//              } else {
+//                if (a.name.split(" ").length < b.name.split(" ").length) {
+//                  return -1;
+//                } else if (a.name.split(" ").length >
+//                    b.name.split(" ").length) {
+//                  return 1;
+//                } else {
+//                  return 0;
+//                }
+//              }
+//            }
+//          } else if (a.tier == 3) {
+//            if (a.numSplitPartialKeyword > b.numSplitPartialKeyword) {
+//              return -1;
+//            } else if (a.numSplitPartialKeyword < b.numSplitPartialKeyword) {
+//              return 1;
+//            } else {
+//              return 0;
+//            }
+//          }
+//        }
+//
+//        return 0;
+//      });
+//
+//      if (recommendedEmojis.length > widget.numRecommended) {
+//        recommendedEmojis =
+//            recommendedEmojis.getRange(0, widget.numRecommended).toList();
+//      }
+//
+//      Widget recommedneedPageResults;
+//      if (recommendedEmojis.length != 0) {
+//        recommedneedPageResults = Container(
+//          color: widget.bgColor,
+//          child: GridView.count(
+//            shrinkWrap: true,
+//            primary: true,
+//            crossAxisCount: widget.columns,
+//            children: List.generate(recommendedEmojis.length, (index) {
+//              if (index < recommendedEmojis.length) {
+//                switch (widget.buttonMode) {
+//                  case ButtonMode.MATERIAL:
+//                    return Center(
+//                        child: FlatButton(
+//                      padding: EdgeInsets.all(0),
+//                      child: Center(
+//                        child: Text(
+//                          recommendedEmojis[index].emoji,
+//                          style: TextStyle(fontSize: 24),
+//                        ),
+//                      ),
+//                      onPressed: () {
+//                        _Recommended recommended = recommendedEmojis[index];
+//                        widget.onEmojiSelected(
+//                            Emoji(
+//                                name: recommended.name,
+//                                emoji: recommended.emoji),
+//                            selectedCategory);
+//                        addRecentEmoji(Emoji(
+//                            name: recommended.name, emoji: recommended.emoji));
+//                      },
+//                    ));
+//                    break;
+//                  case ButtonMode.CUPERTINO:
+//                    return Center(
+//                        child: CupertinoButton(
+//                      pressedOpacity: 0.4,
+//                      padding: EdgeInsets.all(0),
+//                      child: Center(
+//                        child: Text(
+//                          recommendedEmojis[index].emoji,
+//                          style: TextStyle(fontSize: 24),
+//                        ),
+//                      ),
+//                      onPressed: () {
+//                        _Recommended recommended = recommendedEmojis[index];
+//                        widget.onEmojiSelected(
+//                            Emoji(
+//                                name: recommended.name,
+//                                emoji: recommended.emoji),
+//                            selectedCategory);
+//                        addRecentEmoji(Emoji(
+//                            name: recommended.name, emoji: recommended.emoji));
+//                      },
+//                    ));
+//
+//                    break;
+//                  default:
+//                    return Container();
+//                    break;
+//                }
+//              } else {
+//                return Container();
+//              }
+//            }),
+//          ),
+//        );
+//      }
+//      else {
+//        recommedneedPageResults = Container(
+//            color: widget.bgColor,
+//            child: Center(
+//                child: Text(
+//              widget.noRecommendationsText,
+//              style: widget.noRecommendationsStyle,
+//            )));
+//      }
+//      var recommedneedPage = Column(
+//        children: <Widget>[
+//          Expanded(child: recommedneedPageResults),
+//          EmojiSearchView(onSearch: (keyword) {
+//            setState(() {
+//              print(keyword);
+//              recommendKeywords = ["racing"];
+//            });
+//          },)
+//        ],
+//      );
+//
+//
+//      recommendedPages.add(recommedneedPage);
+//    }
 
-            splitName.forEach((splitName) {
-              if (splitName.replaceAll(":", "").toLowerCase() ==
-                  keyword.toLowerCase()) {
-                numSplitEqualKeyword += 1;
-              } else if (splitName
-                  .replaceAll(":", "")
-                  .toLowerCase()
-                  .contains(keyword.toLowerCase())) {
-                numSplitPartialKeyword += 1;
-              }
-            });
-          }
-        });
-
-        if (numSplitEqualKeyword > 0) {
-          if (numSplitEqualKeyword == name.split(" ").length) {
-            recommendedEmojis.add(_Recommended(
-                name: name, emoji: allEmojis[allNames.indexOf(name)], tier: 1));
-          } else {
-            recommendedEmojis.add(_Recommended(
-                name: name,
-                emoji: allEmojis[allNames.indexOf(name)],
-                tier: 2,
-                numSplitEqualKeyword: numSplitEqualKeyword,
-                numSplitPartialKeyword: numSplitPartialKeyword));
-          }
-        } else if (numSplitPartialKeyword > 0) {
-          recommendedEmojis.add(_Recommended(
-              name: name,
-              emoji: allEmojis[allNames.indexOf(name)],
-              tier: 3,
-              numSplitPartialKeyword: numSplitPartialKeyword));
-        }
-      });
-
-      recommendedEmojis.sort((a, b) {
-        if (a.tier < b.tier) {
-          return -1;
-        } else if (a.tier > b.tier) {
-          return 1;
-        } else {
-          if (a.tier == 1) {
-            if (a.name.split(" ").length > b.name.split(" ").length) {
-              return -1;
-            } else if (a.name.split(" ").length < b.name.split(" ").length) {
-              return 1;
-            } else {
-              return 0;
-            }
-          } else if (a.tier == 2) {
-            if (a.numSplitEqualKeyword > b.numSplitEqualKeyword) {
-              return -1;
-            } else if (a.numSplitEqualKeyword < b.numSplitEqualKeyword) {
-              return 1;
-            } else {
-              if (a.numSplitPartialKeyword > b.numSplitPartialKeyword) {
-                return -1;
-              } else if (a.numSplitPartialKeyword < b.numSplitPartialKeyword) {
-                return 1;
-              } else {
-                if (a.name.split(" ").length < b.name.split(" ").length) {
-                  return -1;
-                } else if (a.name.split(" ").length >
-                    b.name.split(" ").length) {
-                  return 1;
-                } else {
-                  return 0;
-                }
-              }
-            }
-          } else if (a.tier == 3) {
-            if (a.numSplitPartialKeyword > b.numSplitPartialKeyword) {
-              return -1;
-            } else if (a.numSplitPartialKeyword < b.numSplitPartialKeyword) {
-              return 1;
-            } else {
-              return 0;
-            }
-          }
-        }
-
-        return 0;
-      });
-
-      if (recommendedEmojis.length > widget.numRecommended) {
-        recommendedEmojis =
-            recommendedEmojis.getRange(0, widget.numRecommended).toList();
-      }
-
-      if (recommendedEmojis.length != 0) {
-
-          recommendedPages.add(Container(
-            color: widget.bgColor,
-            child: GridView.count(
-              shrinkWrap: true,
-              primary: true,
-              crossAxisCount: widget.columns,
-              children: List.generate(recommendedEmojis.length, (index) {
-                if (index < recommendedEmojis.length) {
-                  switch (widget.buttonMode) {
-                    case ButtonMode.MATERIAL:
-                      return Center(
-                          child: FlatButton(
-                        padding: EdgeInsets.all(0),
-                        child: Center(
-                          child: Text(
-                            recommendedEmojis[index].emoji,
-                            style: TextStyle(fontSize: 24),
-                          ),
-                        ),
-                        onPressed: () {
-                          _Recommended recommended = recommendedEmojis[index];
-                          widget.onEmojiSelected(
-                              Emoji(
-                                  name: recommended.name,
-                                  emoji: recommended.emoji),
-                              selectedCategory);
-                          addRecentEmoji(Emoji(
-                              name: recommended.name,
-                              emoji: recommended.emoji));
-                        },
-                      ));
-                      break;
-                    case ButtonMode.CUPERTINO:
-                      return Center(
-                          child: CupertinoButton(
-                        pressedOpacity: 0.4,
-                        padding: EdgeInsets.all(0),
-                        child: Center(
-                          child: Text(
-                            recommendedEmojis[index].emoji,
-                            style: TextStyle(fontSize: 24),
-                          ),
-                        ),
-                        onPressed: () {
-                          _Recommended recommended = recommendedEmojis[index];
-                          widget.onEmojiSelected(
-                              Emoji(
-                                  name: recommended.name,
-                                  emoji: recommended.emoji),
-                              selectedCategory);
-                          addRecentEmoji(Emoji(
-                              name: recommended.name,
-                              emoji: recommended.emoji));
-                        },
-                      ));
-
-                      break;
-                    default:
-                      return Container();
-                      break;
-                  }
-                } else {
-                  return Container();
-                }
-              }),
-            ),
-          ));
-
-      } else {
-        recommendedPages.add(Container(
-            color: widget.bgColor,
-            child: Center(
-                child: Text(
-              widget.noRecommendationsText,
-              style: widget.noRecommendationsStyle,
-            ))));
-      }
-    }
+    updateRecommededdEmojies();
 
     List<Widget> recentPages = List();
     recentPages.add(recentPage());
@@ -604,7 +741,6 @@ class _EmojiPickerState extends State<EmojiPicker> {
         }),
       ),
     ));
-
 
     List<Widget> travelPages = List();
 
@@ -912,9 +1048,8 @@ class _EmojiPickerState extends State<EmojiPicker> {
         }),
       ),
     ));
-    //  }
 
-    pages.addAll(recommendedPages);
+//    pages.addAll(_recommendedPages);
     pages.addAll(recentPages);
     pages.addAll(smileyPages);
     pages.addAll(animalPages);
@@ -1008,9 +1143,9 @@ class _EmojiPickerState extends State<EmojiPicker> {
   Widget defaultButton(CategoryIcon categoryIcon) {
     return SizedBox(
       width: MediaQuery.of(context).size.width /
-          (widget.recommendKeywords == null ? 9 : 10),
+          (recommendKeywords == null ? 9 : 10),
       height: MediaQuery.of(context).size.width /
-          (widget.recommendKeywords == null ? 9 : 10),
+          (recommendKeywords == null ? 9 : 10),
       child: Container(
         color: widget.bgColor,
         child: Center(
@@ -1038,50 +1173,17 @@ class _EmojiPickerState extends State<EmojiPicker> {
       } else if (category == Category.ANIMALS) {
         return 1 + 1 + 1;
       } else if (category == Category.FOODS) {
-        return 1 +
-            1 +
-            1 +
-            1;
+        return 1 + 1 + 1 + 1;
       } else if (category == Category.TRAVEL) {
-        return 1 +
-            1 +
-            1 +
-            1 +
-            1;
+        return 1 + 1 + 1 + 1 + 1;
       } else if (category == Category.ACTIVITIES) {
-        return 1 +
-            1 +
-            1 +
-            1 +
-            1 +
-            1;
+        return 1 + 1 + 1 + 1 + 1 + 1;
       } else if (category == Category.OBJECTS) {
-        return 1 +
-            1 +
-            1 +
-            1 +
-            1 +
-            1 +
-            1;
+        return 1 + 1 + 1 + 1 + 1 + 1 + 1;
       } else if (category == Category.SYMBOLS) {
-        return 1 +
-            1 +
-            1 +
-            1 +
-            1 +
-            1 +
-            1 +
-            1;
+        return 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1;
       } else if (category == Category.FLAGS) {
-        return 1 +
-            1 +
-            1 +
-            1 +
-            1 +
-            1 +
-            1 +
-            1 +
-            1;
+        return 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1;
       }
       return 0;
     }
@@ -1127,9 +1229,9 @@ class _EmojiPickerState extends State<EmojiPicker> {
       var children = Category.values.map((categoryValue) {
         return SizedBox(
           width: MediaQuery.of(context).size.width /
-              (widget.recommendKeywords == null ? 9 : 10),
+              (recommendKeywords == null ? 9 : 10),
           height: MediaQuery.of(context).size.width /
-              (widget.recommendKeywords == null ? 9 : 10),
+              (recommendKeywords == null ? 9 : 10),
           child: widget.buttonMode == ButtonMode.MATERIAL
               ? FlatButton(
                   padding: EdgeInsets.all(0),
@@ -1148,14 +1250,13 @@ class _EmojiPickerState extends State<EmojiPicker> {
                           size: 22,
                           color: selectedCategory ==
                                   categoryValue //Category.RECENT
-                              ? widget.categoryIcons.recentIcon.selectedColor
+                              ? widget.indicatorColor
                               : widget.categoryIcons.recentIcon.color,
                         ),
                         SizedBox(height: 6),
                         Container(
                           color: selectedCategory == categoryValue
-                              ? widget.categoryIcons.recommendationIcon
-                                  .selectedColor
+                              ? widget.indicatorColor
                               : Colors.transparent,
                           height: 2,
                         ),
@@ -1182,7 +1283,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                       widget.categoryIcons.recentIcon.icon,
                       size: 22,
                       color: selectedCategory == categoryValue //Category.RECENT
-                          ? widget.categoryIcons.recentIcon.selectedColor
+                          ? widget.indicatorColor
                           : widget.categoryIcons.recentIcon.color,
                     ),
                   ),
@@ -1213,64 +1314,23 @@ class _EmojiPickerState extends State<EmojiPicker> {
                 children: pages,
                 controller: pageController,
                 onPageChanged: (index) {
-                  if (widget.recommendKeywords != null &&
-                      index < 1) {
+                  if (recommendKeywords != null && index < 1) {
                     selectedCategory = Category.RECOMMENDED;
                   } else if (index < 1 + 1) {
                     selectedCategory = Category.RECENT;
-                  } else if (index <
-                      1 + 1 + 1) {
+                  } else if (index < 1 + 1 + 1) {
                     selectedCategory = Category.SMILEYS;
-                  } else if (index <
-                      1 +
-                          1 +
-                          1 +
-                          1) {
+                  } else if (index < 1 + 1 + 1 + 1) {
                     selectedCategory = Category.ANIMALS;
-                  } else if (index <
-                      1 +
-                          1 +
-                          1 +
-                          1 +
-                          1) {
+                  } else if (index < 1 + 1 + 1 + 1 + 1) {
                     selectedCategory = Category.FOODS;
-                  } else if (index <
-                      1 +
-                          1 +
-                          1 +
-                          1 +
-                          1 +
-                          1) {
+                  } else if (index < 1 + 1 + 1 + 1 + 1 + 1) {
                     selectedCategory = Category.TRAVEL;
-                  } else if (index <
-                      1 +
-                          1 +
-                          1 +
-                          1 +
-                          1 +
-                          1 +
-                          1) {
+                  } else if (index < 1 + 1 + 1 + 1 + 1 + 1 + 1) {
                     selectedCategory = Category.ACTIVITIES;
-                  } else if (index <
-                      1 +
-                          1 +
-                          1 +
-                          1 +
-                          1 +
-                          1 +
-                          1 +
-                          1) {
+                  } else if (index < 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1) {
                     selectedCategory = Category.OBJECTS;
-                  } else if (index <
-                      1 +
-                          1 +
-                          1 +
-                          1 +
-                          1 +
-                          1 +
-                          1 +
-                          1 +
-                          1) {
+                  } else if (index < 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1 + 1) {
                     selectedCategory = Category.SYMBOLS;
                   } else {
                     selectedCategory = Category.FLAGS;
@@ -1290,14 +1350,14 @@ class _EmojiPickerState extends State<EmojiPicker> {
   }
 }
 
-class _Recommended {
+class Recommended {
   final String name;
   final String emoji;
   final int tier;
   final int numSplitEqualKeyword;
   final int numSplitPartialKeyword;
 
-  _Recommended(
+  Recommended(
       {this.name,
       this.emoji,
       this.tier,

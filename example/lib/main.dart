@@ -595,11 +595,10 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
                       chatController: _chatController,
                       emojiPickerConfig: EmojiPickerConfig(
                           columns: 8,
-                          recommendKeywords: ["racing", "horse"],
                           numRecommended: 10,
-                          bgBarColor: Colors.black38,
+                          bgBarColor: Colors.black,
                           bgColor: Colors.grey[900],
-                          indicatorColor: Colors.white,
+//                          indicatorColor: Colors.yellow,
                       ),
                       giphyPickerConfig: GiphyPickerConfig(
                           apiKey: "q3KulxGCIKWrOU283I3xM3DWvMnO5zOV",

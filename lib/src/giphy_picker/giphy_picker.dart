@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:giphy_client/giphy_client.dart';
@@ -30,8 +28,7 @@ class GiphyPicker {
     await Navigator.push(
       context,
       MaterialPageRoute(
-          builder: (BuildContext context) =>
-              GiphyContext(
+          builder: (BuildContext context) => GiphyContext(
                 child: GiphySearchPage(),
                 apiKey: apiKey,
                 rating: rating,
@@ -56,21 +53,24 @@ class GiphyPicker {
     return result;
   }
 
-  static Widget pickerGifWidget({
-    @required BuildContext context,
-    @required String apiKey,
-    String rating = GiphyRating.g,
-    String lang = GiphyLanguage.english,
-    Widget title,
-    Function onClose,
-    Function(GiphyGif) onSelected
-  }) {
+  static Widget pickerGifWidget(
+      {@required BuildContext context,
+      @required String apiKey,
+      String rating = GiphyRating.g,
+      String lang = GiphyLanguage.english,
+      Widget title,
+      Function onClose,
+      Function(GiphyGif) onSelected}) {
     return SingleChildScrollView(
       child: GiphyContext(
         child: SafeArea(
-            child: Container(width: 400, height: 280, child: GiphySearchView(onClose: onClose), color: Colors.white,),
-            bottom: false
-        ),
+            child: Container(
+              width: 400,
+              height: 280,
+              child: GiphySearchView(onClose: onClose),
+              color: Colors.white,
+            ),
+            bottom: false),
         apiKey: apiKey,
         rating: rating,
         language: lang,
@@ -91,7 +91,6 @@ class GiphyPicker {
     ErrorListener onError,
     bool showPreviewPage = true,
     String searchText = 'Search GIPHY',
-
   }) async {
     GiphyGif result;
 

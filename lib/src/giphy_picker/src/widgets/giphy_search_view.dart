@@ -28,8 +28,6 @@ class _GiphySearchViewState extends State<GiphySearchView> {
       _search(giphy);
     });
 
-
-
     super.initState();
   }
 

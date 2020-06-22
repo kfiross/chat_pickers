@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 
-
-enum DialogPosition{
+enum DialogPosition {
   TOP,
   BOTTOM,
 }
 
-
 class PositionedDialog extends StatelessWidget {
-
-
   /// Creates a dialog.
   ///
   /// Typically used in conjunction with [showDialog].
@@ -74,7 +70,6 @@ class PositionedDialog extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget content;
 
-
   final List<Widget> actions;
 
   final Widget title;
@@ -103,8 +98,7 @@ class PositionedDialog extends StatelessWidget {
       );
 
     AlignmentGeometry alignment;
-    switch(position){
-
+    switch (position) {
       case DialogPosition.TOP:
         alignment = Alignment.topCenter;
         break;
@@ -140,14 +134,16 @@ class PositionedDialog extends StatelessWidget {
                     type: MaterialType.card,
                     child: Column(
                       children: <Widget>[
-                        Container(child: title, margin: const EdgeInsets.only(top: 10, bottom: 18)) ?? Container(),
+                        Container(
+                                child: title,
+                                margin: const EdgeInsets.only(
+                                    top: 10, bottom: 18)) ??
+                            Container(),
                         content,
                         actionsWidget ?? Container()
                       ],
-                    )
-                ),
+                    )),
               ),
-
             ],
           ),
         ),

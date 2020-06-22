@@ -13,7 +13,6 @@ export 'src/emoji_picker/emoji_picker.dart';
 export 'src/giphy_picker/giphy_picker.dart';
 
 class EmojiPickerConfig {
-
   /// Number of columns in keyboard grid
   final int columns;
 
@@ -50,20 +49,20 @@ class EmojiPickerConfig {
   /// Determines the style given to the keyboard keys
 //  final ButtonMode buttonMode;
 
-  EmojiPickerConfig(
-      {this.columns,
-      this.bgColor,
-      this.bgBarColor,
-      this.indicatorColor,
-      this.recommendKeywords,
-      this.numRecommended,
-      this.noRecommendationsText,
-      this.noRecommendationsStyle,
-      this.noRecentsText,
-      this.noRecentsStyle,
-      this.categoryIcons,
+  EmojiPickerConfig({
+    this.columns,
+    this.bgColor,
+    this.bgBarColor,
+    this.indicatorColor = Colors.white,
+    this.recommendKeywords = const [],
+    this.numRecommended,
+    this.noRecommendationsText,
+    this.noRecommendationsStyle,
+    this.noRecentsText,
+    this.noRecentsStyle,
+    this.categoryIcons,
 //      this.buttonMode,
-      });
+  });
 }
 
 class GiphyPickerConfig {
@@ -100,7 +99,6 @@ class GiphyPickerConfig {
       this.onSelected,
       this.showPreviewPage,
       this.searchText});
-
 }
 
 class ChatPickers extends HookWidget {
@@ -112,8 +110,7 @@ class ChatPickers extends HookWidget {
       {Key key,
       this.chatController,
       this.emojiPickerConfig,
-      @required this.giphyPickerConfig
-      })
+      @required this.giphyPickerConfig})
       : super(key: key);
 
   @override
@@ -121,15 +118,11 @@ class ChatPickers extends HookWidget {
     var _tabSelected = useState<int>(0);
     PageController _pageController = usePageController(_tabSelected);
 
-
     Widget gifKeyboard() {
       return GiphyPicker.pickerGifWidget(
           context: context,
-          apiKey: "q3KulxGCIKWrOU283I3xM3DWvMnO5zOV", //Constants.GIPHY_API_KEY,
-          onClose: () {
-
-
-          },
+          apiKey: giphyPickerConfig.apiKey,
+          onClose: () {},
           onSelected: (gif) {
             // todo: upload gif to chat
             ///_uploadGif(gif.images.original.url);
@@ -147,7 +140,6 @@ class ChatPickers extends HookWidget {
         rows: 150,
         columns: emojiPickerConfig.columns,
         buttonMode: ButtonMode.MATERIAL,
-        recommendKeywords: emojiPickerConfig.recommendKeywords,
         numRecommended: emojiPickerConfig.numRecommended,
         bgBarColor: emojiPickerConfig.bgBarColor,
         bgColor: emojiPickerConfig.bgColor,
@@ -189,8 +181,9 @@ class ChatPickers extends HookWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     IconButton(
-                      color:
-                          _tabSelected.value == 0 ? Colors.white : Colors.grey[500],
+                      color: _tabSelected.value == 0
+                          ? Colors.white
+                          : Colors.grey[500],
                       icon: Icon(Icons.insert_emoticon),
                       onPressed: () {
                         _pageController.animateToPage(0,
@@ -199,8 +192,9 @@ class ChatPickers extends HookWidget {
                       },
                     ),
                     IconButton(
-                      color:
-                          _tabSelected.value == 1 ? Colors.white : Colors.grey[500],
+                      color: _tabSelected.value == 1
+                          ? Colors.white
+                          : Colors.grey[500],
                       icon: Icon(MdiIcons.gif),
                       onPressed: () {
                         _pageController.animateToPage(1,
@@ -238,8 +232,8 @@ class ChatPickers extends HookWidget {
 //                ),
 //              ),
                 Positioned(
-                  right: 35/4,
-                  bottom: 35/4,
+                  right: 35 / 4,
+                  bottom: 35 / 4,
                   child: Column(
                     children: <Widget>[
                       Material(
@@ -251,10 +245,10 @@ class ChatPickers extends HookWidget {
                             color: Colors.white,
                           ),
                           onTap: () {
-                            try{
-                              chatController.text = chatController.text.substring(0, chatController.text.length - 2);
-                            }
-                            catch (e){
+                            try {
+                              chatController.text = chatController.text
+                                  .substring(0, chatController.text.length - 2);
+                            } catch (e) {
                               chatController.clear();
                             }
                           },
