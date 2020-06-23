@@ -1,6 +1,6 @@
 name: chat_pickers
 description: A new Flutter package for displaying a keyboard for using emojis/gifs.
-version: 0.2.0
+version: 0.2.1
 homepage: "https://github.com/kfiross/chat_pickers"
 
 environment:
@@ -12,15 +12,14 @@ dependencies:
 
   http: ^0.12.1
   giphy_client: ^0.2.0        # for giphy picker
-  shared_preferences: ^0.5.6      # for keeping recent picked emojies
+  shared_preferences: ^0.5.7      # for keeping recent picked emojies
   material_design_icons_flutter: ^4.0.5345    # for icons
 
   # base package implementation of choosing emojies on each platform
   emoji_picker: ^0.1.0
 
-  flutter_hooks: ^0.9.0
-
-  universal_io: ^1.0.1 # for work on web
+  flutter_hooks: ^0.10.0
+  universal_io: ^1.0.1    # for work on web
 
 dev_dependencies:
   flutter_test:

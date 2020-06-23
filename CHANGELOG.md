@@ -1,11 +1,11 @@
-## [0.2.0]
+## [0.2.1]
+* Add GIFs for previewing features.
 
-* Added searching emojies by a keyword
+## [0.2.0]
+* Added searching emojies by a keyword.
 
 ## [0.1.0+1]
-
 * Added README
 
 ## [0.1.0]
-
 * Initial Release
