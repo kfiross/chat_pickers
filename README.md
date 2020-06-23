@@ -7,6 +7,19 @@ Heavily based on the awesome(!) packages:
 [giphy_picker](https://pub.dev/packages/giphy_picker)<br>
 [emoji_picker](https://pub.dev/packages/emoji_picker)
 
+## Preview
+General usage:
+
+![](gifs/general.gif)
+
+Searching for an emoji:
+
+![](gifs/search_emoji.gif)
+
+adding emojis as part of text messssage:
+
+![](gifs/add_emoji_in_text.gif)
+
 ## Getting Started
 
 For using the GIFs page you have to use GIPHY API key
