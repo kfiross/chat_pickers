@@ -8,7 +8,7 @@ import 'emoji_lists.dart' as emojiList;
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'search.dart';
+import 'search_emoji_widget.dart';
 
 /// All the possible categories that [Emoji] can be put into
 ///
@@ -66,7 +66,6 @@ class EmojiPicker extends StatefulWidget {
   final Color indicatorColor;
 
   static const Color _defaultBgColor = const Color.fromRGBO(242, 242, 242, 1);
-  
 
   /// The maximum number of emojis to be recommended
   final int numRecommended;
@@ -209,13 +208,11 @@ class _EmojiPickerState extends State<EmojiPicker> {
     return newMap;
   }
 
-  updateRecommededdEmojies(){
+  updateRecommededdEmojies() {
     List<Recommended> recommendedEmojis = List();
     _recommendedPages.clear();
 
     if (recommendKeywords != null) {
-
-
       Widget recommedneedPageResults;
       if (recommendedEmojis.length != 0) {
         recommedneedPageResults = Container(
@@ -230,47 +227,47 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   case ButtonMode.MATERIAL:
                     return Center(
                         child: FlatButton(
-                          padding: EdgeInsets.all(0),
-                          child: Center(
-                            child: Text(
-                              recommendedEmojis[index].emoji,
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () {
-                            Recommended recommended = recommendedEmojis[index];
-                            widget.onEmojiSelected(
-                                Emoji(
-                                    name: recommended.name,
-                                    emoji: recommended.emoji),
-                                selectedCategory);
-                            addRecentEmoji(Emoji(
-                                name: recommended.name, emoji: recommended.emoji));
-                          },
-                        ));
+                      padding: EdgeInsets.all(0),
+                      child: Center(
+                        child: Text(
+                          recommendedEmojis[index].emoji,
+                          style: TextStyle(fontSize: 24),
+                        ),
+                      ),
+                      onPressed: () {
+                        Recommended recommended = recommendedEmojis[index];
+                        widget.onEmojiSelected(
+                            Emoji(
+                                name: recommended.name,
+                                emoji: recommended.emoji),
+                            selectedCategory);
+                        addRecentEmoji(Emoji(
+                            name: recommended.name, emoji: recommended.emoji));
+                      },
+                    ));
                     break;
                   case ButtonMode.CUPERTINO:
                     return Center(
                         child: CupertinoButton(
-                          pressedOpacity: 0.4,
-                          padding: EdgeInsets.all(0),
-                          child: Center(
-                            child: Text(
-                              recommendedEmojis[index].emoji,
-                              style: TextStyle(fontSize: 24),
-                            ),
-                          ),
-                          onPressed: () {
-                            Recommended recommended = recommendedEmojis[index];
-                            widget.onEmojiSelected(
-                                Emoji(
-                                    name: recommended.name,
-                                    emoji: recommended.emoji),
-                                selectedCategory);
-                            addRecentEmoji(Emoji(
-                                name: recommended.name, emoji: recommended.emoji));
-                          },
-                        ));
+                      pressedOpacity: 0.4,
+                      padding: EdgeInsets.all(0),
+                      child: Center(
+                        child: Text(
+                          recommendedEmojis[index].emoji,
+                          style: TextStyle(fontSize: 24),
+                        ),
+                      ),
+                      onPressed: () {
+                        Recommended recommended = recommendedEmojis[index];
+                        widget.onEmojiSelected(
+                            Emoji(
+                                name: recommended.name,
+                                emoji: recommended.emoji),
+                            selectedCategory);
+                        addRecentEmoji(Emoji(
+                            name: recommended.name, emoji: recommended.emoji));
+                      },
+                    ));
 
                     break;
                   default:
@@ -283,15 +280,14 @@ class _EmojiPickerState extends State<EmojiPicker> {
             }),
           ),
         );
-      }
-      else {
+      } else {
         recommedneedPageResults = Container(
             color: widget.bgColor,
             child: Center(
                 child: Text(
-                  widget.noRecommendationsText,
-                  style: widget.noRecommendationsStyle,
-                )));
+              widget.noRecommendationsText,
+              style: widget.noRecommendationsStyle,
+            )));
       }
 //      var recommedneedPage = Column(
 //        children: <Widget>[
@@ -304,8 +300,8 @@ class _EmojiPickerState extends State<EmojiPicker> {
 //        ],
 //      );
 
-
-      _recommendedPages.add(Container(child: EmojiSearchView(
+      _recommendedPages.add(Container(
+          child: EmojiSearchView(
         allEmojis: allEmojis,
         allNames: allNames,
         numRecommended: widget.numRecommended,
@@ -317,14 +313,13 @@ class _EmojiPickerState extends State<EmojiPicker> {
         columns: widget.columns,
       )));
 
-      if(pages.isNotEmpty)
+      if (pages.isNotEmpty)
         setState(() {
           pages[0] = _recommendedPages[0];
         });
-      else{
+      else {
         pages.add(_recommendedPages[0]);
       }
-
     }
   }
 
@@ -356,9 +351,6 @@ class _EmojiPickerState extends State<EmojiPicker> {
     allEmojis.addAll(objectMap.values);
     allEmojis.addAll(symbolMap.values);
     allEmojis.addAll(flagMap.values);
-
-
-
 
 //    if (recommendKeywords != null) {
 //      allNames.forEach((name) {
