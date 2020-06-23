@@ -10,15 +10,15 @@ Heavily based on the awesome(!) packages:
 ## Preview
 General usage:
 
-![](gifs/general.gif)
+<img src="/gifs/general.gif" width="300" height="624"/>
 
 Searching for an emoji:
 
-![](gifs/search_emoji.gif)
+<img src="/gifs/search_emoji.gif" width="300" height="624"/>
 
 adding emojis as part of text messssage:
 
-![](gifs/add_emoji_in_text.gif)
+<img src="/gifs/add_emoji_in_text.gif" width="300" height="624"/>
 
 ## Getting Started
 
