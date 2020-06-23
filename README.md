@@ -10,15 +10,15 @@ Heavily based on the awesome(!) packages:
 ## Preview
 General usage:
 
-<img src="/gifs/general.gif" width="200" height="416"/>
+<img src="/gifs/general.gif" width="250" height="520"/>
 
 Searching for an emoji:
 
-<img src="/gifs/search_emoji.gif" width="200" height="416"/>
+<img src="/gifs/search_emoji.gif" width="250" height="520"/>
 
 adding emojis as part of text messssage:
 
-<img src="/gifs/add_emoji_in_text.gif" width="200" height="416"/>
+<img src="/gifs/add_emoji_in_text.gif" width="250" height="520"/>
 
 ## Getting Started
 
