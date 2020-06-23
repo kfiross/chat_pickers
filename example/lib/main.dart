@@ -347,8 +347,17 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
 
 
   Widget buildData(BuildContext context, List<Message> messages) {
-    messages = messages?.reversed?.toList();
-    DateTime lastDateTime = messages[0]?.time;
+    if(messages == null){
+      return Expanded(
+        child: Container(
+            color: Colors.grey[900],
+            child: Center(child: CircularProgressIndicator()),
+        ),
+      );
+    }
+
+    messages = messages.reversed.toList();
+    DateTime lastDateTime = messages[0].time;
     bool first = true;
 
     return Expanded(

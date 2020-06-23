@@ -20,7 +20,7 @@ abstract class _ChatsStore with Store{
   _ChatsStore(this._chatsRepository);
 
   @observable
-  ObservableFuture<List<Message>> _messagesFuture;
+  ObservableFuture<List<Message>> messagesFuture;
 
   @observable
   List<Message> messages;
@@ -30,13 +30,13 @@ abstract class _ChatsStore with Store{
 
   @computed
   StoreState get state {
-    if(_messagesFuture == null){
+    if(messagesFuture == null){
       return StoreState.initial;
     }
-    else if(_messagesFuture.status == FutureStatus.pending){
+    else if(messagesFuture.status == FutureStatus.pending){
       return _first ? StoreState.loading : StoreState.loaded;
     }
-    else if(_messagesFuture.status == FutureStatus.fulfilled){
+    else if(messagesFuture.status == FutureStatus.fulfilled){
       if(_first)
         _first = false;
       return StoreState.loaded;
@@ -51,8 +51,8 @@ abstract class _ChatsStore with Store{
     try{
       errorMessage = null;
       var result = _chatsRepository.fetchAllChatMessages(chatId);
-      _messagesFuture = ObservableFuture(result);
-      messages = await _messagesFuture;
+      messagesFuture = ObservableFuture(result);
+      messages = await messagesFuture;
     }
     on Exception{
       errorMessage = "Could not load chat";
@@ -65,8 +65,8 @@ abstract class _ChatsStore with Store{
     try{
       errorMessage = null;
       var result = _chatsRepository.addMessage("chatId", message);
-      _messagesFuture = ObservableFuture(result);
-      messages = await _messagesFuture;
+      messagesFuture = ObservableFuture(result);
+      messages = await messagesFuture;
     }
     on Exception{
       errorMessage = "Could not add message";

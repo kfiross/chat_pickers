@@ -1,8 +1,9 @@
-import 'dart:io';
+//import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:universal_io/io.dart';
 import 'emoji_lists.dart' as emojiList;
 
 import 'package:shared_preferences/shared_preferences.dart';
