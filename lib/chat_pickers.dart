@@ -8,6 +8,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'src/emoji_picker/emoji_picker.dart';
 import 'src/giphy_picker/giphy_picker.dart';
 import 'src/hooks/use_page_controller.dart';
+// import 'src/hooks/use_page_controller.dart';
 
 export 'src/emoji_picker/emoji_picker.dart';
 export 'src/giphy_picker/giphy_picker.dart';
@@ -116,7 +117,7 @@ class ChatPickers extends HookWidget {
   @override
   Widget build(BuildContext context) {
     var _tabSelected = useState<int>(0);
-    PageController _pageController = usePageController(_tabSelected);
+    PageController _pageController = useMyPageController(_tabSelected);
 
     Widget gifKeyboard() {
       return GiphyPicker.pickerGifWidget(

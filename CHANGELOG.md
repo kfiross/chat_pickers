@@ -1,3 +1,6 @@
+## [0.2.2]
+* Updated to latest dependencies
+
 ## [0.2.1]
 * Add GIFs for previewing features.
 

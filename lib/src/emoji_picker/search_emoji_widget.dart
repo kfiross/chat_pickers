@@ -46,7 +46,7 @@ class EmojiSearchView extends StatefulWidget {
 
 class _EmojiSearchViewState extends State<EmojiSearchView> {
   final _textController = TextEditingController();
-  final _scrollController = ScrollController();
+  // final _scrollController = ScrollController();
   final _repoController = StreamController<List>();
 
   List<Recommended> recommendedEmojis = [];

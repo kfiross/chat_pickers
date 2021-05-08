@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-PageController usePageController(ValueNotifier<int> tabSelected) {
+PageController useMyPageController(ValueNotifier<int> tabSelected) {
   final PageController pageController = PageController();
 
   pageController.addListener(() {
