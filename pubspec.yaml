@@ -1,6 +1,6 @@
 name: chat_pickers
 description: A new Flutter package for displaying a keyboard for using emojis/gifs.
-version: 0.2.2
+version: 0.2.3
 homepage: "https://github.com/kfiross/chat_pickers"
 
 environment:
