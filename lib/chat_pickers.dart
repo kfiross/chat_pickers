@@ -15,13 +15,13 @@ export 'src/giphy_picker/giphy_picker.dart';
 
 class EmojiPickerConfig {
   /// Number of columns in keyboard grid
-  final int columns;
+  final int? columns;
 
   /// The background color of the keyboard
-  final Color bgColor;
+  final Color? bgColor;
 
   /// The background color of the categories bar
-  final Color bgBarColor;
+  final Color? bgBarColor;
 
   /// The color of the keyboard page indicator
   final Color indicatorColor;
@@ -30,22 +30,22 @@ class EmojiPickerConfig {
   final List<String> recommendKeywords;
 
   /// The maximum number of emojis to be recommended
-  final int numRecommended;
+  final int? numRecommended;
 
   /// The string to be displayed if no recommendations found
-  final String noRecommendationsText;
+  final String? noRecommendationsText;
 
   /// The text style for the [noRecommendationsText]
-  final TextStyle noRecommendationsStyle;
+  final TextStyle? noRecommendationsStyle;
 
   /// The string to be displayed if no recent emojis to display
-  final String noRecentsText;
+  final String? noRecentsText;
 
   /// The text style for the [noRecentsText]
-  final TextStyle noRecentsStyle;
+  final TextStyle? noRecentsStyle;
 
   /// Determines the icon to display for each [Category]
-  final CategoryIcons categoryIcons;
+  final CategoryIcons? categoryIcons;
 
   /// Determines the style given to the keyboard keys
 //  final ButtonMode buttonMode;
@@ -71,28 +71,28 @@ class GiphyPickerConfig {
   final String apiKey;
 
   ///
-  final String rating;
+  final String? rating;
 
   /// Language of searching gifs
-  final String lang;
+  final String? lang;
 
   ///
-  final Widget title;
+  final Widget? title;
 
   ///
-  final ErrorListener onError;
+  final ErrorListener? onError;
 
   ///
-  final bool showPreviewPage;
+  final bool? showPreviewPage;
 
   ///
-  final String searchText;
+  final String? searchText;
 
   ///
-  Function(GiphyGif) onSelected;
+  Function(GiphyGif)? onSelected;
 
   GiphyPickerConfig(
-      {@required this.apiKey,
+      {required this.apiKey,
       this.rating,
       this.lang,
       this.title,
@@ -103,15 +103,15 @@ class GiphyPickerConfig {
 }
 
 class ChatPickers extends HookWidget {
-  final TextEditingController chatController;
-  final EmojiPickerConfig emojiPickerConfig;
+  final TextEditingController? chatController;
+  final EmojiPickerConfig? emojiPickerConfig;
   final GiphyPickerConfig giphyPickerConfig;
 
   const ChatPickers(
-      {Key key,
+      {Key? key,
       this.chatController,
       this.emojiPickerConfig,
-      @required this.giphyPickerConfig})
+      required this.giphyPickerConfig})
       : super(key: key);
 
   @override
@@ -128,7 +128,7 @@ class ChatPickers extends HookWidget {
             // todo: upload gif to chat
             ///_uploadGif(gif.images.original.url);
 
-            giphyPickerConfig.onSelected(gif);
+            giphyPickerConfig.onSelected!(gif);
 
             // show back keyboard
             FocusScope.of(context).unfocus(); //?
@@ -139,15 +139,15 @@ class ChatPickers extends HookWidget {
       return EmojiPicker(
         //context: context,
         rows: 150,
-        columns: emojiPickerConfig.columns,
+        columns: emojiPickerConfig!.columns,
         buttonMode: ButtonMode.MATERIAL,
-        numRecommended: emojiPickerConfig.numRecommended,
-        bgBarColor: emojiPickerConfig.bgBarColor,
-        bgColor: emojiPickerConfig.bgColor,
-        indicatorColor: emojiPickerConfig.indicatorColor,
+        numRecommended: emojiPickerConfig!.numRecommended,
+        bgBarColor: emojiPickerConfig!.bgBarColor,
+        bgColor: emojiPickerConfig!.bgColor,
+        indicatorColor: emojiPickerConfig!.indicatorColor,
         onEmojiSelected: (emoji, category) {
           // setState(() {
-          chatController.text += emoji.emoji;
+          chatController!.text += emoji.emoji!;
           //});
 
           // print(_messageText);
@@ -164,7 +164,7 @@ class ChatPickers extends HookWidget {
     ];
 
     return Container(
-      color: emojiPickerConfig.bgBarColor,
+      color: emojiPickerConfig!.bgBarColor,
       child: Column(
         children: <Widget>[
           Expanded(
@@ -247,10 +247,10 @@ class ChatPickers extends HookWidget {
                           ),
                           onTap: () {
                             try {
-                              chatController.text = chatController.text
-                                  .substring(0, chatController.text.length - 2);
+                              chatController!.text = chatController!.text
+                                  .substring(0, chatController!.text.length - 2);
                             } catch (e) {
-                              chatController.clear();
+                              chatController!.clear();
                             }
                           },
                         ),

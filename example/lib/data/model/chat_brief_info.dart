@@ -1,7 +1,7 @@
 class ChatBriefInfo {
-  String name;
-  String message;
-  String time;
+  String? name;
+  String? message;
+  String? time;
   bool isRead;
   String otherUid;
 

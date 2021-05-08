@@ -7,26 +7,26 @@ import 'emoji_picker.dart';
 
 /// Provides the UI for searching emojies.
 class EmojiSearchView extends StatefulWidget {
-  final Function onClose;
-  final Function(String) onSearch;
-  final Function onEmojiSelected;
-  final Function addRecentEmoji;
+  final Function? onClose;
+  final Function(String)? onSearch;
+  final Function? onEmojiSelected;
+  final Function? addRecentEmoji;
 
-  final int numRecommended;
+  final int? numRecommended;
 
-  final List<String> allNames;
-  final List<String> allEmojis;
+  final List<String?>? allNames;
+  final List<String?>? allEmojis;
 
   final buttonMode;
 
   final selectedCategory;
 
-  final int columns;
+  final int? columns;
 
-  final Color bgColor;
+  final Color? bgColor;
 
   const EmojiSearchView(
-      {Key key,
+      {Key? key,
       this.onClose,
       this.onSearch,
       this.allNames,
@@ -86,7 +86,7 @@ class _EmojiSearchViewState extends State<EmojiSearchView> {
                     Icons.keyboard,
                     color: Colors.white,
                   ),
-                  onPressed: widget.onClose,
+                  onPressed: widget.onClose as void Function()?,
                 ),
               ),
               onChanged: (value) {
@@ -108,15 +108,15 @@ class _EmojiSearchViewState extends State<EmojiSearchView> {
 
     if (t.isEmpty) return;
 
-    widget.allNames.forEach((name) {
+    widget.allNames!.forEach((name) {
       int numSplitEqualKeyword = 0;
       int numSplitPartialKeyword = 0;
 
       recommendKeywords.forEach((keyword) {
-        if (name.toLowerCase() == keyword.toLowerCase()) {
+        if (name!.toLowerCase() == keyword.toLowerCase()) {
           recommendedEmojis.add(Recommended(
               name: name,
-              emoji: widget.allEmojis[widget.allNames.indexOf(name)],
+              emoji: widget.allEmojis![widget.allNames!.indexOf(name)],
               tier: 1));
         } else {
           List<String> splitName = name.split(" ");
@@ -136,15 +136,15 @@ class _EmojiSearchViewState extends State<EmojiSearchView> {
       });
 
       if (numSplitEqualKeyword > 0) {
-        if (numSplitEqualKeyword == name.split(" ").length) {
+        if (numSplitEqualKeyword == name!.split(" ").length) {
           recommendedEmojis.add(Recommended(
               name: name,
-              emoji: widget.allEmojis[widget.allNames.indexOf(name)],
+              emoji: widget.allEmojis![widget.allNames!.indexOf(name)],
               tier: 1));
         } else {
           recommendedEmojis.add(Recommended(
               name: name,
-              emoji: widget.allEmojis[widget.allNames.indexOf(name)],
+              emoji: widget.allEmojis![widget.allNames!.indexOf(name)],
               tier: 2,
               numSplitEqualKeyword: numSplitEqualKeyword,
               numSplitPartialKeyword: numSplitPartialKeyword));
@@ -152,22 +152,22 @@ class _EmojiSearchViewState extends State<EmojiSearchView> {
       } else if (numSplitPartialKeyword > 0) {
         recommendedEmojis.add(Recommended(
             name: name,
-            emoji: widget.allEmojis[widget.allNames.indexOf(name)],
+            emoji: widget.allEmojis![widget.allNames!.indexOf(name)],
             tier: 3,
             numSplitPartialKeyword: numSplitPartialKeyword));
       }
     });
 
     recommendedEmojis.sort((a, b) {
-      if (a.tier < b.tier) {
+      if (a.tier! < b.tier!) {
         return -1;
-      } else if (a.tier > b.tier) {
+      } else if (a.tier! > b.tier!) {
         return 1;
       } else {
         if (a.tier == 1) {
-          if (a.name.split(" ").length > b.name.split(" ").length) {
+          if (a.name!.split(" ").length > b.name!.split(" ").length) {
             return -1;
-          } else if (a.name.split(" ").length < b.name.split(" ").length) {
+          } else if (a.name!.split(" ").length < b.name!.split(" ").length) {
             return 1;
           } else {
             return 0;
@@ -183,9 +183,9 @@ class _EmojiSearchViewState extends State<EmojiSearchView> {
             } else if (a.numSplitPartialKeyword < b.numSplitPartialKeyword) {
               return 1;
             } else {
-              if (a.name.split(" ").length < b.name.split(" ").length) {
+              if (a.name!.split(" ").length < b.name!.split(" ").length) {
                 return -1;
-              } else if (a.name.split(" ").length > b.name.split(" ").length) {
+              } else if (a.name!.split(" ").length > b.name!.split(" ").length) {
                 return 1;
               } else {
                 return 0;
@@ -206,9 +206,9 @@ class _EmojiSearchViewState extends State<EmojiSearchView> {
       return 0;
     });
 
-    if (recommendedEmojis.length > widget.numRecommended) {
+    if (recommendedEmojis.length > widget.numRecommended!) {
       recommendedEmojis =
-          recommendedEmojis.getRange(0, widget.numRecommended).toList();
+          recommendedEmojis.getRange(0, widget.numRecommended!).toList();
     }
   }
 
@@ -218,7 +218,7 @@ class _EmojiSearchViewState extends State<EmojiSearchView> {
       child: GridView.count(
         shrinkWrap: true,
         primary: true,
-        crossAxisCount: widget.columns,
+        crossAxisCount: widget.columns!,
         children: List.generate(recommendedEmojis.length, (index) {
           if (index < recommendedEmojis.length) {
             switch (widget.buttonMode) {
@@ -228,16 +228,16 @@ class _EmojiSearchViewState extends State<EmojiSearchView> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      recommendedEmojis[index].emoji,
+                      recommendedEmojis[index].emoji!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
                   onPressed: () {
                     Recommended recommended = recommendedEmojis[index];
-                    widget.onEmojiSelected(
+                    widget.onEmojiSelected!(
                         Emoji(name: recommended.name, emoji: recommended.emoji),
                         widget.selectedCategory);
-                    widget.addRecentEmoji(Emoji(
+                    widget.addRecentEmoji!(Emoji(
                         name: recommended.name, emoji: recommended.emoji));
                   },
                 ));
@@ -249,24 +249,22 @@ class _EmojiSearchViewState extends State<EmojiSearchView> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      recommendedEmojis[index].emoji,
+                      recommendedEmojis[index].emoji!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
                   onPressed: () {
                     Recommended recommended = recommendedEmojis[index];
-                    widget.onEmojiSelected(
+                    widget.onEmojiSelected!(
                         Emoji(name: recommended.name, emoji: recommended.emoji),
                         widget.selectedCategory);
-                    widget.addRecentEmoji(Emoji(
+                    widget.addRecentEmoji!(Emoji(
                         name: recommended.name, emoji: recommended.emoji));
                   },
                 ));
 
-                break;
               default:
                 return Container();
-                break;
             }
           } else {
             return Container();

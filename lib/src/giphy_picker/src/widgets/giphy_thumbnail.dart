@@ -5,12 +5,12 @@ import '../../src/model/giphy_repository.dart';
 
 /// Loads and renders a gif thumbnail image using a GiphyRepostory and an index.
 class GiphyThumbnail extends StatefulWidget {
-  final GiphyRepository repo;
+  final GiphyRepository? repo;
   final int index;
-  final Widget placeholder;
+  final Widget? placeholder;
 
   const GiphyThumbnail(
-      {Key key, @required this.repo, @required this.index, this.placeholder})
+      {Key? key, required this.repo, required this.index, this.placeholder})
       : super(key: key);
 
   @override
@@ -18,17 +18,17 @@ class GiphyThumbnail extends StatefulWidget {
 }
 
 class _GiphyThumbnailState extends State<GiphyThumbnail> {
-  Future<Uint8List> _loadPreview;
+  Future<Uint8List>? _loadPreview;
 
   @override
   void initState() {
-    _loadPreview = widget.repo.getPreview(widget.index);
+    _loadPreview = widget.repo!.getPreview(widget.index);
     super.initState();
   }
 
   @override
   void dispose() {
-    widget.repo.cancelGetPreview(widget.index);
+    widget.repo!.cancelGetPreview(widget.index);
     super.dispose();
   }
 
@@ -39,6 +39,6 @@ class _GiphyThumbnailState extends State<GiphyThumbnail> {
         if (!snapshot.hasData) {
           return widget.placeholder ?? Container(color: Colors.grey.shade200);
         }
-        return Image.memory(snapshot.data, fit: BoxFit.cover);
+        return Image.memory(snapshot.data!, fit: BoxFit.cover);
       });
 }

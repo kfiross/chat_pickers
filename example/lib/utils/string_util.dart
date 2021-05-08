@@ -10,7 +10,10 @@ String getDateString(DateTime dateTime) {
 }
 
 // ignore: missing_return
-int dayFromString(String s){
+int dayFromString(String? s){
+  if(s == null)
+    return -1;
+
   switch(s){
     case 'Jan':
       return 1;
@@ -37,6 +40,8 @@ int dayFromString(String s){
     case 'Dec':
       return 12;
   }
+
+  return -1;
 }
 
 
@@ -66,14 +71,14 @@ String getInDayDate(DateTime dateTime){
 
 }
 
-DateTime stringToDate(String dayString, {String format}) {
+DateTime stringToDate(String dayString, {String? format}) {
   if(format == "dd/mm/yyyy"){
     var parts = dayString.split('/');
     if(parts.length != 3)
       return DateTime(1,1,1900);
 
     var day = int.parse(parts[0]);
-    var month = int.tryParse(parts[1]);
+    var month = int.parse(parts[1]);
     var year = int.parse(parts[2]);
 
     return DateTime(year ,month ,day);

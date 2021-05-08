@@ -10,7 +10,7 @@ class PositionedDialog extends StatelessWidget {
   ///
   /// Typically used in conjunction with [showDialog].
   const PositionedDialog({
-    Key key,
+    Key? key,
     this.backgroundColor,
     this.elevation,
     this.insetAnimationDuration = const Duration(milliseconds: 100),
@@ -29,7 +29,7 @@ class PositionedDialog extends StatelessWidget {
   ///
   /// If `null`, [ThemeData.cardColor] is used.
   /// {@endtemplate}
-  final Color backgroundColor;
+  final Color? backgroundColor;
 
   /// {@template flutter.material.dialog.elevation}
   /// The z-coordinate of this [Dialog].
@@ -38,7 +38,7 @@ class PositionedDialog extends StatelessWidget {
   /// dialog's elevation is 24.0.
   /// {@endtemplate}
   /// {@macro flutter.material.material.elevation}
-  final double elevation;
+  final double? elevation;
 
   /// {@template flutter.material.dialog.insetAnimationDuration}
   /// The duration of the animation to show when the system keyboard intrudes
@@ -63,16 +63,16 @@ class PositionedDialog extends StatelessWidget {
   ///
   /// The default shape is a [RoundedRectangleBorder] with a radius of 2.0.
   /// {@endtemplate}
-  final ShapeBorder shape;
+  final ShapeBorder? shape;
 
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
-  final Widget content;
+  final Widget? content;
 
-  final List<Widget> actions;
+  final List<Widget>? actions;
 
-  final Widget title;
+  final Widget? title;
 
   final DialogPosition position;
 
@@ -85,19 +85,19 @@ class PositionedDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final DialogTheme dialogTheme = DialogTheme.of(context);
 
-    Widget actionsWidget;
+    Widget? actionsWidget;
     if (actions != null)
       actionsWidget = Container(
         color: Colors.white,
         child: Padding(
           padding: const EdgeInsets.all(3),
           child: ButtonBar(
-            children: actions,
+            children: actions!,
           ),
         ),
       );
 
-    AlignmentGeometry alignment;
+    AlignmentGeometry? alignment;
     switch (position) {
       case DialogPosition.TOP:
         alignment = Alignment.topCenter;
@@ -133,15 +133,16 @@ class PositionedDialog extends StatelessWidget {
                     shape: shape ?? dialogTheme.shape ?? _defaultDialogShape,
                     type: MaterialType.card,
                     child: Column(
-                      children: <Widget>[
-                        Container(
-                                child: title,
-                                margin: const EdgeInsets.only(
-                                    top: 10, bottom: 18)) ??
-                            Container(),
-                        content,
-                        actionsWidget ?? Container()
-                      ],
+                      // todo: fix this
+                    //   children: <Widget>[
+                    //     Container(
+                    //             child: title,
+                    //             margin: const EdgeInsets.only(
+                    //                 top: 10, bottom: 18)) ??
+                    //         Container(),
+                    //     content,
+                    //     actionsWidget ?? Container()
+                    //   ]) as List<Widget>,
                     )),
               ),
             ],

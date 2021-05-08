@@ -7,9 +7,9 @@ import '../../src/widgets/giphy_thumbnail_grid.dart';
 
 /// Provides the UI for searching Giphy gif images.
 class GiphySearchView extends StatefulWidget {
-  final Function onClose;
+  final Function? onClose;
 
-  const GiphySearchView({Key key, this.onClose}) : super(key: key);
+  const GiphySearchView({Key? key, this.onClose}) : super(key: key);
 
   @override
   _GiphySearchViewState createState() => _GiphySearchViewState();
@@ -50,7 +50,7 @@ class _GiphySearchViewState extends State<GiphySearchView> {
             hintText: giphy.searchText,
             suffixIcon: IconButton(
               icon: Icon(Icons.keyboard),
-              onPressed: widget.onClose,
+              onPressed: widget.onClose as void Function()?,
             ),
           ),
           onChanged: (value) => _delayedSearch(giphy, value),
@@ -62,7 +62,7 @@ class _GiphySearchViewState extends State<GiphySearchView> {
               builder: (BuildContext context,
                   AsyncSnapshot<GiphyRepository> snapshot) {
                 if (snapshot.hasData) {
-                  return snapshot.data.totalCount > 0
+                  return snapshot.data!.totalCount! > 0
                       ? NotificationListener(
                           child: RefreshIndicator(
                               child: GiphyThumbnailGrid(
@@ -71,7 +71,7 @@ class _GiphySearchViewState extends State<GiphySearchView> {
                                   scrollController: _scrollController),
                               onRefresh: () =>
                                   _search(giphy, term: _textController.text)),
-                          onNotification: (n) {
+                          onNotification: (dynamic n) {
                             // hide keyboard when scrolling
                             if (n is UserScrollNotification) {
                               FocusScope.of(context).requestFocus(FocusNode());
@@ -119,7 +119,7 @@ class _GiphySearchViewState extends State<GiphySearchView> {
       _repoController.add(repo);
     } catch (error) {
       _repoController.addError(error);
-      giphy.onError(error);
+      giphy.onError!(error);
     }
   }
 }

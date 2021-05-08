@@ -20,23 +20,24 @@ abstract class _ChatsStore with Store{
   _ChatsStore(this._chatsRepository);
 
   @observable
-  ObservableFuture<List<Message>> messagesFuture;
+  ObservableFuture<List<Message>>? messagesFuture;
 
   @observable
-  List<Message> messages;
+  List<Message>? messages;
 
   @observable
-  String errorMessage;
+  String? errorMessage;
 
   @computed
   StoreState get state {
     if(messagesFuture == null){
       return StoreState.initial;
     }
-    else if(messagesFuture.status == FutureStatus.pending){
+
+    else if(messagesFuture!.status == FutureStatus.pending){
       return _first ? StoreState.loading : StoreState.loaded;
     }
-    else if(messagesFuture.status == FutureStatus.fulfilled){
+    else if(messagesFuture!.status == FutureStatus.fulfilled){
       if(_first)
         _first = false;
       return StoreState.loaded;

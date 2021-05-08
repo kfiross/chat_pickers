@@ -1,5 +1,7 @@
 //import 'dart:io';
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
@@ -39,7 +41,7 @@ enum ButtonMode {
 /// Callback function for when emoji is selected
 ///
 /// The function returns the selected [Emoji] as well as the [Category] from which it originated
-typedef void OnEmojiSelected(Emoji emoji, Category category);
+typedef void OnEmojiSelected(Emoji emoji, Category? category);
 
 /// The Emoji Keyboard widget
 ///
@@ -48,7 +50,7 @@ typedef void OnEmojiSelected(Emoji emoji, Category category);
 /// There is also a bottombar which displays all the possible [Category] and allow the user to quickly switch to that [Category]
 class EmojiPicker extends StatefulWidget {
   /// Number of columns in keyboard grid
-  final int columns;
+  final int? columns;
 
   /// Number of rows in keyboard grid
   final int rows;
@@ -57,10 +59,10 @@ class EmojiPicker extends StatefulWidget {
   final OnEmojiSelected onEmojiSelected;
 
   /// The background color of the keyboard
-  final Color bgColor;
+  final Color? bgColor;
 
   /// The background color of the categories bar
-  final Color bgBarColor;
+  final Color? bgBarColor;
 
   /// The color of the keyboard page indicator
   final Color indicatorColor;
@@ -68,7 +70,7 @@ class EmojiPicker extends StatefulWidget {
   static const Color _defaultBgColor = const Color.fromRGBO(242, 242, 242, 1);
 
   /// The maximum number of emojis to be recommended
-  final int numRecommended;
+  final int? numRecommended;
 
   /// The string to be displayed if no recommendations found
   final String noRecommendationsText;
@@ -89,8 +91,8 @@ class EmojiPicker extends StatefulWidget {
   final ButtonMode buttonMode;
 
   EmojiPicker({
-    Key key,
-    @required this.onEmojiSelected,
+    Key? key,
+    required this.onEmojiSelected,
     this.columns = 7,
     this.rows = 3,
     this.bgColor = _defaultBgColor,
@@ -112,26 +114,26 @@ class EmojiPicker extends StatefulWidget {
 }
 
 class _EmojiPickerState extends State<EmojiPicker> {
-  static const platform = const MethodChannel("emoji_picker");
+  static const platform = const MethodChannel("emoji_picker_flutter");
 
   /// The currently selected [Category]
   ///
   /// This [Category] will have its button in the bottombar darkened
-  Category selectedCategory;
+  Category? selectedCategory;
 
-  List<Widget> pages = new List();
-  List<String> allNames = List();
-  List<String> allEmojis = List();
-  List<String> recentEmojis = List();
+  List<Widget> pages = [];
+  List<String?> allNames = [];
+  List<String?> allEmojis = [];
+  List<String?> recentEmojis = [];
 
-  Map<String, String> smileyMap = Map();
-  Map<String, String> animalMap = Map();
-  Map<String, String> foodMap = Map();
-  Map<String, String> travelMap = Map();
-  Map<String, String> activityMap = Map();
-  Map<String, String> objectMap = Map();
-  Map<String, String> symbolMap = Map();
-  Map<String, String> flagMap = Map();
+  Map<String, String?> smileyMap = Map();
+  Map<String, String?> animalMap = Map();
+  Map<String, String?> foodMap = Map();
+  Map<String, String?> travelMap = Map();
+  Map<String, String?> activityMap = Map();
+  Map<String, String?> objectMap = Map();
+  Map<String, String?> symbolMap = Map();
+  Map<String, String?> flagMap = Map();
 
   bool loaded = false;
 
@@ -161,24 +163,25 @@ class _EmojiPickerState extends State<EmojiPicker> {
     });
   }
 
-  Future<bool> _isEmojiAvailable(String emoji) async {
+  Future<bool?> _isEmojiAvailable(String? emoji) async {
     if (Platform.isAndroid) {
-      bool isAvailable;
+      bool? isAvailable;
       try {
         isAvailable =
-            await platform.invokeMethod("isAvailable", {"emoji": emoji});
+            await platform.invokeMethod("checkAvailability", {"emoji": emoji});
       } on PlatformException catch (_) {
         isAvailable = false;
       }
       return isAvailable;
     }
+
     return true;
   }
 
-  Future<List<String>> getRecentEmojis() async {
+  Future<List<String?>> getRecentEmojis() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final key = "recents";
-    recentEmojis = prefs.getStringList(key) ?? List();
+    recentEmojis = prefs.getStringList(key) ?? [];
     return recentEmojis;
   }
 
@@ -189,27 +192,48 @@ class _EmojiPickerState extends State<EmojiPicker> {
       print("adding emoji");
       setState(() {
         recentEmojis.insert(0, emoji.name);
-        prefs.setStringList(key, recentEmojis);
+        prefs.setStringList(key, recentEmojis as List<String>);
       });
     });
   }
 
-  Future<Map<String, String>> getAvailableEmojis(
-      Map<String, String> map) async {
-    Map<String, String> newMap = Map<String, String>();
+  Future<Map<String, String>?> getAvailableEmojis(
+      Map<String, String> emoji) async {
 
-    for (String key in map.keys) {
-      bool isAvailable = await _isEmojiAvailable(map[key]);
-      if (isAvailable) {
-        newMap[key] = map[key];
+    if (Platform.isAndroid) {
+      Map<String, String>? filtered = {};
+      var delimiter = '|';
+      try {
+        var entries = emoji.values.join(delimiter);
+        var keys = emoji.keys.join(delimiter);
+        var result = (await platform.invokeMethod<String>('checkAvailability',
+            {'emojiKeys': keys, 'emojiEntries': entries})) as String;
+        var resultKeys = result.split(delimiter);
+        for (var i = 0; i < resultKeys.length; i++) {
+          filtered[resultKeys[i]] = emoji[resultKeys[i]]!;
+        }
+      } on PlatformException catch (_) {
+        filtered = null;
       }
+      return filtered;
+    } else {
+      return emoji;
     }
 
-    return newMap;
+    // Map<String, String?> newMap = Map<String, String?>();
+    //
+    // for (String key in map.keys) {
+    //   bool isAvailable = await _isEmojiAvailable(map[key]) ?? false;
+    //   if (isAvailable) {
+    //     newMap[key] = map[key];
+    //   }
+    // }
+    //
+    // return newMap;
   }
 
   updateRecommededdEmojies() {
-    List<Recommended> recommendedEmojis = List();
+    List<Recommended> recommendedEmojis = [];
     _recommendedPages.clear();
 
     if (recommendKeywords != null) {
@@ -220,7 +244,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
           child: GridView.count(
             shrinkWrap: true,
             primary: true,
-            crossAxisCount: widget.columns,
+            crossAxisCount: widget.columns!,
             children: List.generate(recommendedEmojis.length, (index) {
               if (index < recommendedEmojis.length) {
                 switch (widget.buttonMode) {
@@ -230,7 +254,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                       padding: EdgeInsets.all(0),
                       child: Center(
                         child: Text(
-                          recommendedEmojis[index].emoji,
+                          recommendedEmojis[index].emoji!,
                           style: TextStyle(fontSize: 24),
                         ),
                       ),
@@ -253,7 +277,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                       padding: EdgeInsets.all(0),
                       child: Center(
                         child: Text(
-                          recommendedEmojis[index].emoji,
+                          recommendedEmojis[index].emoji!,
                           style: TextStyle(fontSize: 24),
                         ),
                       ),
@@ -324,14 +348,14 @@ class _EmojiPickerState extends State<EmojiPicker> {
   }
 
   Future updateEmojis() async {
-    smileyMap = await getAvailableEmojis(emojiList.smileys);
-    animalMap = await getAvailableEmojis(emojiList.animals);
-    foodMap = await getAvailableEmojis(emojiList.foods);
-    travelMap = await getAvailableEmojis(emojiList.travel);
-    activityMap = await getAvailableEmojis(emojiList.activities);
-    objectMap = await getAvailableEmojis(emojiList.objects);
-    symbolMap = await getAvailableEmojis(emojiList.symbols);
-    flagMap = await getAvailableEmojis(emojiList.flags);
+    smileyMap = await getAvailableEmojis(emojiList.smileys)?? {};
+    animalMap = await getAvailableEmojis(emojiList.animals)?? {};
+    foodMap = await getAvailableEmojis(emojiList.foods)?? {};
+    travelMap = await getAvailableEmojis(emojiList.travel)?? {};
+    activityMap = await getAvailableEmojis(emojiList.activities) ?? {};
+    objectMap = await getAvailableEmojis(emojiList.objects) ?? {};
+    symbolMap = await getAvailableEmojis(emojiList.symbols) ?? {};
+    flagMap = await getAvailableEmojis(emojiList.flags) ?? {};
 
     allNames.clear();
     allNames.addAll(smileyMap.keys);
@@ -548,20 +572,20 @@ class _EmojiPickerState extends State<EmojiPicker> {
 
     updateRecommededdEmojies();
 
-    List<Widget> recentPages = List();
+    List<Widget> recentPages = [];
     recentPages.add(recentPage());
 
-    List<Widget> smileyPages = List();
+    List<Widget> smileyPages = [];
 
     smileyPages.add(Container(
       color: widget.bgColor,
       child: GridView.count(
         shrinkWrap: true,
         primary: true,
-        crossAxisCount: widget.columns,
+        crossAxisCount: widget.columns!,
         children: List.generate(smileyMap.values.toList().length, (index) {
           if (index < smileyMap.values.toList().length) {
-            String emojiTxt = smileyMap.values.toList()[index];
+            String? emojiTxt = smileyMap.values.toList()[index];
 
             switch (widget.buttonMode) {
               case ButtonMode.MATERIAL:
@@ -570,7 +594,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      emojiTxt,
+                      emojiTxt!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -590,7 +614,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      emojiTxt,
+                      emojiTxt!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -613,14 +637,14 @@ class _EmojiPickerState extends State<EmojiPicker> {
       ),
     ));
 
-    List<Widget> animalPages = List();
+    List<Widget> animalPages = [];
 
     animalPages.add(Container(
       color: widget.bgColor,
       child: GridView.count(
         shrinkWrap: true,
         primary: true,
-        crossAxisCount: widget.columns,
+        crossAxisCount: widget.columns!,
         children: List.generate(animalMap.values.toList().length, (index) {
           if (index < animalMap.values.toList().length) {
             switch (widget.buttonMode) {
@@ -630,7 +654,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      animalMap.values.toList()[index],
+                      animalMap.values.toList()[index]!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -650,7 +674,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      animalMap.values.toList()[index],
+                      animalMap.values.toList()[index]!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -662,10 +686,9 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
+
               default:
                 return Container();
-                break;
             }
           } else {
             return Container();
@@ -674,14 +697,14 @@ class _EmojiPickerState extends State<EmojiPicker> {
       ),
     ));
 
-    List<Widget> foodPages = List();
+    List<Widget> foodPages = [];
 
     foodPages.add(Container(
       color: widget.bgColor,
       child: GridView.count(
         shrinkWrap: true,
         primary: true,
-        crossAxisCount: widget.columns,
+        crossAxisCount: widget.columns!,
         children: List.generate(foodMap.values.toList().length, (index) {
           if (index < foodMap.values.toList().length) {
             switch (widget.buttonMode) {
@@ -691,7 +714,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      foodMap.values.toList()[index],
+                      foodMap.values.toList()[index]!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -703,7 +726,6 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
               case ButtonMode.CUPERTINO:
                 return Center(
                     child: CupertinoButton(
@@ -711,7 +733,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      foodMap.values.toList()[index],
+                      foodMap.values.toList()[index]!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -723,10 +745,8 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
               default:
                 return Container();
-                break;
             }
           } else {
             return Container();
@@ -735,14 +755,14 @@ class _EmojiPickerState extends State<EmojiPicker> {
       ),
     ));
 
-    List<Widget> travelPages = List();
+    List<Widget> travelPages = [];
 
     travelPages.add(Container(
       color: widget.bgColor,
       child: GridView.count(
         shrinkWrap: true,
         primary: true,
-        crossAxisCount: widget.columns,
+        crossAxisCount: widget.columns!,
         children: List.generate(travelMap.values.toList().length, (index) {
           if (index < travelMap.values.toList().length) {
             switch (widget.buttonMode) {
@@ -752,7 +772,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      travelMap.values.toList()[index],
+                      travelMap.values.toList()[index]!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -764,7 +784,6 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
               case ButtonMode.CUPERTINO:
                 return Center(
                     child: CupertinoButton(
@@ -772,7 +791,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      travelMap.values.toList()[index],
+                      travelMap.values.toList()[index]!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -784,10 +803,8 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
               default:
                 return Container();
-                break;
             }
           } else {
             return Container();
@@ -796,17 +813,17 @@ class _EmojiPickerState extends State<EmojiPicker> {
       ),
     ));
 
-    List<Widget> activityPages = List();
+    List<Widget> activityPages = [];
 
     activityPages.add(Container(
       color: widget.bgColor,
       child: GridView.count(
         shrinkWrap: true,
         primary: true,
-        crossAxisCount: widget.columns,
+        crossAxisCount: widget.columns!,
         children: List.generate(activityMap.values.toList().length, (index) {
           if (index < activityMap.values.toList().length) {
-            String emojiTxt = activityMap.values.toList()[index];
+            String? emojiTxt = activityMap.values.toList()[index];
 
             switch (widget.buttonMode) {
               case ButtonMode.MATERIAL:
@@ -815,7 +832,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      activityMap.values.toList()[index],
+                      activityMap.values.toList()[index]!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -827,7 +844,6 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
               case ButtonMode.CUPERTINO:
                 return Center(
                     child: CupertinoButton(
@@ -835,7 +851,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      emojiTxt,
+                      emojiTxt!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -847,10 +863,8 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
               default:
                 return Container();
-                break;
             }
           } else {
             return Container();
@@ -859,14 +873,14 @@ class _EmojiPickerState extends State<EmojiPicker> {
       ),
     ));
 
-    List<Widget> objectPages = List();
+    List<Widget> objectPages = [];
 
     objectPages.add(Container(
       color: widget.bgColor,
       child: GridView.count(
         shrinkWrap: true,
         primary: true,
-        crossAxisCount: widget.columns,
+        crossAxisCount: widget.columns!,
         children: List.generate(objectMap.values.toList().length, (index) {
           if (index < objectMap.values.toList().length) {
             switch (widget.buttonMode) {
@@ -876,7 +890,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      objectMap.values.toList()[index],
+                      objectMap.values.toList()[index]!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -888,7 +902,6 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
               case ButtonMode.CUPERTINO:
                 return Center(
                     child: CupertinoButton(
@@ -896,7 +909,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      objectMap.values.toList()[index],
+                      objectMap.values.toList()[index]!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -908,10 +921,8 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
               default:
                 return Container();
-                break;
             }
           } else {
             return Container();
@@ -920,14 +931,14 @@ class _EmojiPickerState extends State<EmojiPicker> {
       ),
     ));
 
-    List<Widget> symbolPages = List();
+    List<Widget> symbolPages = [];
 
     symbolPages.add(Container(
       color: widget.bgColor,
       child: GridView.count(
         shrinkWrap: true,
         primary: true,
-        crossAxisCount: widget.columns,
+        crossAxisCount: widget.columns!,
         children: List.generate(symbolMap.values.toList().length, (index) {
           if (index < symbolMap.values.toList().length) {
             switch (widget.buttonMode) {
@@ -937,7 +948,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      symbolMap.values.toList()[index],
+                      symbolMap.values.toList()[index]!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -949,7 +960,6 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
               case ButtonMode.CUPERTINO:
                 return Center(
                     child: CupertinoButton(
@@ -957,7 +967,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      symbolMap.values.toList()[index],
+                      symbolMap.values.toList()[index]!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -969,10 +979,8 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
               default:
                 return Container();
-                break;
             }
           } else {
             return Container();
@@ -981,14 +989,14 @@ class _EmojiPickerState extends State<EmojiPicker> {
       ),
     ));
 
-    List<Widget> flagPages = List();
+    List<Widget> flagPages = [];
 
     flagPages.add(Container(
       color: widget.bgColor,
       child: GridView.count(
         shrinkWrap: true,
         primary: true,
-        crossAxisCount: widget.columns,
+        crossAxisCount: widget.columns!,
         children: List.generate(flagMap.values.toList().length, (index) {
           if (index < flagMap.values.toList().length) {
             switch (widget.buttonMode) {
@@ -998,7 +1006,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      flagMap.values.toList()[index],
+                      flagMap.values.toList()[index]!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -1010,7 +1018,6 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
               case ButtonMode.CUPERTINO:
                 return Center(
                     child: CupertinoButton(
@@ -1018,7 +1025,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
                   padding: EdgeInsets.all(0),
                   child: Center(
                     child: Text(
-                      flagMap.values.toList()[index],
+                      flagMap.values.toList()[index]!,
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -1030,10 +1037,8 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
               default:
                 return Container();
-                break;
             }
           } else {
             return Container();
@@ -1067,8 +1072,8 @@ class _EmojiPickerState extends State<EmojiPicker> {
           child: GridView.count(
             shrinkWrap: true,
             primary: true,
-            crossAxisCount: widget.columns,
-            children: List.generate(widget.rows * widget.columns, (index) {
+            crossAxisCount: widget.columns!,
+            children: List.generate(widget.rows * widget.columns!, (index) {
               if (index < recentEmojis.length) {
                 switch (widget.buttonMode) {
                   case ButtonMode.MATERIAL:
@@ -1077,12 +1082,12 @@ class _EmojiPickerState extends State<EmojiPicker> {
                       padding: EdgeInsets.all(0),
                       child: Center(
                         child: Text(
-                          allEmojis[allNames.indexOf(recentEmojis[index])],
+                          allEmojis[allNames.indexOf(recentEmojis[index])]!,
                           style: TextStyle(fontSize: 24),
                         ),
                       ),
                       onPressed: () {
-                        String emojiName = recentEmojis[index];
+                        String? emojiName = recentEmojis[index];
                         widget.onEmojiSelected(
                             Emoji(
                                 name: emojiName,
@@ -1090,7 +1095,6 @@ class _EmojiPickerState extends State<EmojiPicker> {
                             selectedCategory);
                       },
                     ));
-                    break;
                   case ButtonMode.CUPERTINO:
                     return Center(
                         child: CupertinoButton(
@@ -1098,12 +1102,12 @@ class _EmojiPickerState extends State<EmojiPicker> {
                       padding: EdgeInsets.all(0),
                       child: Center(
                         child: Text(
-                          allEmojis[allNames.indexOf(recentEmojis[index])],
+                          allEmojis[allNames.indexOf(recentEmojis[index])]!,
                           style: TextStyle(fontSize: 24),
                         ),
                       ),
                       onPressed: () {
-                        String emojiName = recentEmojis[index];
+                        String? emojiName = recentEmojis[index];
                         widget.onEmojiSelected(
                             Emoji(
                                 name: emojiName,
@@ -1112,10 +1116,8 @@ class _EmojiPickerState extends State<EmojiPicker> {
                       },
                     ));
 
-                    break;
                   default:
                     return Container();
-                    break;
                 }
               } else {
                 return Container();
@@ -1156,7 +1158,7 @@ class _EmojiPickerState extends State<EmojiPicker> {
   Widget build(BuildContext context) {
     PageController pageController;
 
-    int initialPageNumberByCategory(Category category) {
+    int initialPageNumberByCategory(Category? category) {
       if (category == Category.RECOMMENDED) {
         return 0;
       } else if (category == Category.RECENT) {
@@ -1344,9 +1346,9 @@ class _EmojiPickerState extends State<EmojiPicker> {
 }
 
 class Recommended {
-  final String name;
-  final String emoji;
-  final int tier;
+  final String? name;
+  final String? emoji;
+  final int? tier;
   final int numSplitEqualKeyword;
   final int numSplitPartialKeyword;
 
@@ -1370,7 +1372,7 @@ class CategoryIcon {
   final Color selectedColor;
 
   const CategoryIcon({
-    @required this.icon,
+    required this.icon,
     this.color = const Color.fromRGBO(178, 178, 178, 1),
     this.selectedColor = Colors.white,
   });
@@ -1427,17 +1429,17 @@ class CategoryIcons {
 /// A class to store data for each individual emoji
 class Emoji {
   /// The name or description for this emoji
-  final String name;
+  final String? name;
 
   /// The unicode string for this emoji
   ///
   /// This is the string that should be displayed to view the emoji
-  final String emoji;
+  final String? emoji;
 
-  Emoji({@required this.name, @required this.emoji});
+  Emoji({required this.name, required this.emoji});
 
   @override
   String toString() {
-    return "Name: " + name + ", Emoji: " + emoji;
+    return "Name: " + name! + ", Emoji: " + emoji!;
   }
 }

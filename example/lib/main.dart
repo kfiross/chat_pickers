@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:giphy_client/giphy_client.dart';
-import 'package:image_ink_well/image_ink_well.dart';
+// import 'package:image_ink_well/image_ink_well.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 
@@ -68,20 +68,20 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
   bool _isShowSticker = false;
 
   var _imageUrl;
-  String _chatUid;
+  late String _chatUid;
   bool _isBlocked = false;
-  bool _first;
+  late bool _first;
 
-  String _nextUid;
-  int _prevPos;
+  late String _nextUid;
+  late int _prevPos;
   bool _isRTL = false;
 
   // for state management
-  ChatsStore _chatStore;
-  List<ReactionDisposer> _disposers;
+  ChatsStore? _chatStore;
+  List<ReactionDisposer>? _disposers;
 
 
-  AnimationController _animationController;
+  late AnimationController _animationController;
 
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
 
@@ -113,18 +113,18 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
 
     _disposers ??= [
       reaction(
-            (_) => _chatStore.errorMessage, (String message){
-        _scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(message),));
+            (_) => _chatStore?.errorMessage, (String? message){
+        _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(message ?? ''),));
       },),
     ];
 
-    _chatStore.getMessages("chatId");
+    _chatStore?.getMessages("chatId");
 
   }
 
   @override
   void dispose() {
-    _disposers.forEach((disposer) => disposer());
+    _disposers?.forEach((disposer) => disposer());
     super.dispose();
   }
 
@@ -142,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
       time: DateTime.now(),
     );
 
-    _chatStore.addMessage(message);
+    _chatStore?.addMessage(message);
   }
 
 
@@ -208,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
             children: <Widget>[
               Material(
                 child: InkWell(
-                  child: (message.isGif != null && message.isGif)
+                  child: (message.isGif != null && message.isGif!)
                       ? Image.network(
                     message.url,
                     width: 160,
@@ -216,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
                     fit: BoxFit.cover,
                   )
                       : Image.network(
-                    message.url ?? "",
+                    message.url,
                     width: 160,
                     height: 160,
                     fit: BoxFit.cover,
@@ -236,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
                     var imageDialog = AlertDialog(
                       content: Container(
                         child: Image.network(
-                          message.url ?? "",
+                          message.url,
                           fit: BoxFit.cover,
 //                          placeholder: (context, url) => Container(
 //                            width: 160,
@@ -329,7 +329,7 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
 
   Widget body(BuildContext context){
     return Observer(builder: (context) {
-      switch(_chatStore.state){
+      switch(_chatStore?.state){
         case StoreState.initial:
           return Expanded(child: Container());
 
@@ -337,7 +337,7 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
           return buildLoader();
 
         case StoreState.loaded:
-          return buildData(context, _chatStore.messages);
+          return buildData(context, _chatStore?.messages);
 
         default:
           return Container();
@@ -346,7 +346,7 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
   }
 
 
-  Widget buildData(BuildContext context, List<Message> messages) {
+  Widget buildData(BuildContext context, List<Message>? messages) {
     if(messages == null){
       return Expanded(
         child: Container(
@@ -376,7 +376,7 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
 //                if (index >= _messages.length && !isFinishedLoading)
 //                  return buildLoader();
 
-                final Message message = messages[index];
+                final Message message = messages![index];
                 final bool isMe =  message.senderId == "me"; // message.senderId == widget.myUid;
 
                 if (index + 1 < messages.length &&
@@ -647,21 +647,33 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
         : listItems.length + 1; // +1 for loading indicator
   }
 
-  Widget _buildProfileImage(String imageUrl) {
-    var image = (imageUrl == null || imageUrl.contains('null'))
-        ? ExactAssetImage("assets/images/blank_profile.png")
-        : NetworkImage(imageUrl);
+  Widget _buildProfileImage(String? imageUrl) {
 
-    var circleImageInkWell = CircleImageInkWell(
-      onPressed: () {
-        // fill me
-      },
-      size: 32,
-      image: image,
-      splashColor: Colors.white24,
-    );
+    if(imageUrl == null || imageUrl.contains('null')){
+      // var image = ExactAssetImage("assets/images/blank_profile.png");
 
-    return circleImageInkWell;
+    //   return ImageInkWell(
+    //     onPressed: () {
+    //       // fill me
+    //     },
+    //     size: 32,
+    //     image: image,
+    //     splashColor: Colors.white24,
+    //   );
+
+      return Image.asset("assets/images/blank_profile.png",width: 32, height: 32,);
+    }
+
+    // return CircleImageInkWell(
+    //   onPressed: () {
+    //     // fill me
+    //   },
+    //   size: 32,
+    //   image: NetworkImage(imageUrl),
+    //   splashColor: Colors.white24,
+    // );
+
+    return Image.network(imageUrl, height: 32, width: 32);
   }
 
   _backButtonWidget() {
@@ -692,12 +704,12 @@ class _HomeScreenState extends State<HomeScreen>  with SingleTickerProviderState
   void _addGifMessage(GiphyGif gif) {
     PhotoMessage message = PhotoMessage(
       isGif: true,
-      url: gif.images.original.url,
+      url: gif.images?.original?.url ?? "",
       senderId: widget.myUid,
       time: DateTime.now(),
     );
 
-    _chatStore.addMessage(message);
+    _chatStore?.addMessage(message);
   }
 }
 

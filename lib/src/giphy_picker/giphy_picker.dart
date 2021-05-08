@@ -13,17 +13,17 @@ typedef ErrorListener = void Function(dynamic error);
 /// Provides Giphy picker functionality.
 class GiphyPicker {
   /// Renders a full screen modal dialog for searching, and selecting a Giphy image.
-  static Future<GiphyGif> pickGif({
-    @required BuildContext context,
-    @required String apiKey,
+  static Future<GiphyGif?> pickGif({
+    required BuildContext context,
+    required String apiKey,
     String rating = GiphyRating.g,
     String lang = GiphyLanguage.english,
 //    Widget title,
-    ErrorListener onError,
+    ErrorListener? onError,
     bool showPreviewPage = true,
     String searchText = 'Search GIPHY',
   }) async {
-    GiphyGif result;
+    GiphyGif? result;
 
     await Navigator.push(
       context,
@@ -54,13 +54,13 @@ class GiphyPicker {
   }
 
   static Widget pickerGifWidget(
-      {@required BuildContext context,
-      @required String apiKey,
+      {required BuildContext context,
+      required String apiKey,
       String rating = GiphyRating.g,
       String lang = GiphyLanguage.english,
-      Widget title,
-      Function onClose,
-      Function(GiphyGif) onSelected}) {
+      Widget? title,
+      Function? onClose,
+      Function(GiphyGif)? onSelected}) {
     return SingleChildScrollView(
       child: GiphyContext(
         child: SafeArea(
@@ -82,17 +82,17 @@ class GiphyPicker {
     );
   }
 
-  static Future<GiphyGif> pickGifSmallScreen({
-    @required BuildContext context,
-    @required String apiKey,
+  static Future<GiphyGif?> pickGifSmallScreen({
+    required BuildContext context,
+    required String apiKey,
     String rating = GiphyRating.g,
     String lang = GiphyLanguage.english,
-    Widget title,
-    ErrorListener onError,
+    Widget? title,
+    ErrorListener? onError,
     bool showPreviewPage = true,
     String searchText = 'Search GIPHY',
   }) async {
-    GiphyGif result;
+    GiphyGif? result;
 
     showDialog(
       context: context,

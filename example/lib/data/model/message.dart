@@ -1,7 +1,7 @@
 abstract class Message{
   final String senderId;
 
-  DateTime time;
+  late DateTime time;
 
   final bool isLiked;
 
@@ -22,11 +22,11 @@ class TextMessage extends Message {
   final bool unread;
 
   TextMessage({
-    this.senderId,
-    this.time,
-    this.text,
-    this.isLiked,
-    this.unread,
+    required this.senderId,
+    required this.time,
+    required this.text,
+    this.isLiked = false,
+    this.unread = false,
   }) : super(senderId, false, false);
 
   TextMessage.fromMap(Map map)
@@ -61,14 +61,14 @@ class PhotoMessage extends Message {
 
   final bool unread;
 
-  final bool isGif;
+  final bool? isGif;
 
   PhotoMessage({
-    this.senderId,
-    this.time,
-    this.url,
-    this.isLiked,
-    this.unread,
+    required this.senderId,
+    required this.time,
+    required this.url,
+    this.isLiked = false,
+    this.unread = false,
     this.isGif = false,
   }) : super(senderId, false, false);
 

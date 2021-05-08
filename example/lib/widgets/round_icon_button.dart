@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 class RoundIconButton extends StatelessWidget {
   final IconData icon;
-  final Color iconColor;
+  final Color? iconColor;
   final double size;
-  final VoidCallback onPressed;
-  final Color backgroundColor;
-  final double iconSize;
+  final VoidCallback? onPressed;
+  final Color? backgroundColor;
+  final double? iconSize;
 
   final Widget label;
 
@@ -21,23 +21,23 @@ class RoundIconButton extends StatelessWidget {
         label = Container();
 
   RoundIconButton(
-      this.icon, {this.iconColor, this.size, this.onPressed, this.backgroundColor, this.iconSize})
+      this.icon, {this.iconColor, this.size = 50.0, this.onPressed, this.backgroundColor, this.iconSize})
       : label = Container();
 
   RoundIconButton.label(
       this.icon, {
         this.iconColor,
-      this.size,
+      this.size = 50.0,
       this.onPressed,
       this.backgroundColor,
       this.iconSize,
-      @required this.label});
+      required this.label});
 
   @override
   Widget build(BuildContext context) {
     var _iconColor = onPressed!=null ?
         (iconColor ?? Colors.white) :
-        (iconColor.withOpacity(0.3) ?? Colors.grey);
+        (iconColor?.withOpacity(0.3) ?? Colors.grey);
 
 
     return Container(

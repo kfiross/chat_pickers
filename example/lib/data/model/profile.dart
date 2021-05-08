@@ -1,6 +1,6 @@
 class Profile{
   final String name;
-  final String imageUrl;
+  final String? imageUrl;
 
-  Profile({this.name, this.imageUrl});
+  Profile({required this.name, this.imageUrl});
 }

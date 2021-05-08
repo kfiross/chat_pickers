@@ -5,8 +5,8 @@ import 'package:example/domain/repositories_api/chats_repositary.dart';
 
 class ChatsRepositoryImpl extends ChatsRepository {
   Future<Map> fetchChatMessages(String chatId,
-      {String nextMessageId,
-      int lastMessagePos,
+      {String? nextMessageId,
+      int? lastMessagePos,
       Duration difference = const Duration()}) async {
     //Event event;
 

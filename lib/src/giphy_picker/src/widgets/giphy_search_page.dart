@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../src/widgets/giphy_search_view.dart';
 
 class GiphySearchPage extends StatelessWidget {
-  final Widget title;
+  final Widget? title;
 
   const GiphySearchPage({this.title});
 

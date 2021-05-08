@@ -7,15 +7,15 @@ class GiphyContext extends InheritedWidget {
   final String apiKey;
   final String rating;
   final String language;
-  final ValueChanged<GiphyGif> onSelected;
-  final ErrorListener onError;
+  final ValueChanged<GiphyGif>? onSelected;
+  final ErrorListener? onError;
   final bool showPreviewPage;
   final String searchText;
 
   const GiphyContext({
-    Key key,
-    @required Widget child,
-    @required this.apiKey,
+    Key? key,
+    required Widget child,
+    required this.apiKey,
     this.rating = GiphyRating.g,
     this.language = GiphyLanguage.english,
     this.onSelected,
@@ -26,13 +26,13 @@ class GiphyContext extends InheritedWidget {
 
   void select(GiphyGif gif) {
     if (onSelected != null) {
-      onSelected(gif);
+      onSelected!(gif);
     }
   }
 
   void error(dynamic error) {
     if (onError != null) {
-      onError(error);
+      onError!(error);
     }
   }
 
@@ -42,7 +42,7 @@ class GiphyContext extends InheritedWidget {
   static GiphyContext of(BuildContext context) {
     final settings = context
         .getElementForInheritedWidgetOfExactType<GiphyContext>()
-        ?.widget as GiphyContext;
+        ?.widget as GiphyContext?;
 
     if (settings == null) {
       throw 'Required GiphyContext widget not found. Make sure to wrap your widget with GiphyContext.';

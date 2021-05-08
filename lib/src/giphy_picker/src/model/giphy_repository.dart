@@ -8,41 +8,38 @@ import '../../src/model/repository.dart';
 import '../../giphy_picker.dart';
 import 'package:http/http.dart' as http;
 
-typedef Future<GiphyCollection> GetCollection(
-    GiphyClient client, int offset, int limit);
+typedef Future<GiphyCollection>? GetCollection(
+    GiphyClient? client, int offset, int limit);
 
 /// Retrieves and caches gif collections from Giphy.
-class GiphyRepository extends Repository<GiphyGif> {
+class GiphyRepository extends Repository<GiphyGif?> {
   final _client = http.Client();
   final _previewCompleters = HashMap<int, Completer<Uint8List>>();
   final _previewQueue = Queue<int>();
   final GetCollection getCollection;
   final int maxConcurrentPreviewLoad;
-  GiphyClient _giphyClient;
+  GiphyClient? _giphyClient;
   int _previewLoad = 0;
 
   GiphyRepository(
-      {@required String apiKey,
-      @required this.getCollection,
+      {required String apiKey,
+      required this.getCollection,
       this.maxConcurrentPreviewLoad = 4,
       int pageSize = 25,
-      ErrorListener onError})
+      ErrorListener? onError})
       : super(pageSize: pageSize, onError: onError) {
-    assert(getCollection != null);
-    assert(maxConcurrentPreviewLoad != null);
     _giphyClient = GiphyClient(apiKey: apiKey, client: _client);
   }
 
   /// Retrieves specified page of gif data from Giphy.
-  Future<Page<GiphyGif>> getPage(int page) async {
-    final offset = page * pageSize;
-    final collection = await getCollection(_giphyClient, offset, pageSize);
-    return Page(collection.data, page, collection.pagination.totalCount);
+  Future<Page<GiphyGif?>> getPage(int page) async {
+    final offset = page * pageSize!;
+    final collection = await getCollection(_giphyClient, offset, pageSize ?? 0);
+    return Page(collection?.data ?? [], page, collection?.pagination?.totalCount ?? 0);
   }
 
   /// Retrieves a preview Gif image at specified index.
   Future<Uint8List> getPreview(int index) async {
-    assert(index != null);
 
     var completer = _previewCompleters[index];
     if (completer == null) {
@@ -94,10 +91,13 @@ class GiphyRepository extends Repository<GiphyGif> {
     }
   }
 
-  Future<Uint8List> _loadPreviewImage(GiphyGif gif) async {
+  Future<Uint8List?> _loadPreviewImage(GiphyGif? gif) async {
+    if(gif == null)
+      return null;
+
     // fallback to still image if preview is empty
     final url =
-        gif.images.previewGif.url ?? gif.images.fixedWidthSmallStill.url;
+        gif.images?.previewGif?.url ?? gif.images?.fixedWidthSmallStill?.url;
     if (url != null) {
       return await GiphyImage.load(url, client: _client);
     }
@@ -107,13 +107,14 @@ class GiphyRepository extends Repository<GiphyGif> {
 
   /// The repository of trending gif images.
   static Future<GiphyRepository> trending(
-      {@required String apiKey,
+      {required String apiKey,
       String rating = GiphyRating.g,
-      ErrorListener onError}) async {
+      ErrorListener? onError}) async {
     final repo = GiphyRepository(
         apiKey: apiKey,
-        getCollection: (client, offset, limit) =>
-            client.trending(offset: offset, limit: limit, rating: rating),
+        getCollection: (client, offset, limit) {
+          client?.trending(offset: offset, limit: limit, rating: rating);
+        },
         onError: onError);
 
     // retrieve first page
@@ -124,14 +125,14 @@ class GiphyRepository extends Repository<GiphyGif> {
 
   /// A repository of images for given search query.
   static Future<GiphyRepository> search(
-      {@required String apiKey,
-      @required String query,
+      {required String apiKey,
+      required String query,
       String rating = GiphyRating.g,
       String lang = GiphyLanguage.english,
-      ErrorListener onError}) async {
+      ErrorListener? onError}) async {
     final repo = GiphyRepository(
         apiKey: apiKey,
-        getCollection: (client, offset, limit) => client.search(query,
+        getCollection: (client, offset, limit) => client?.search(query,
             offset: offset, limit: limit, rating: rating, lang: lang),
         onError: onError);
 

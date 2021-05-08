@@ -8,9 +8,9 @@ abstract class Repository<T> {
   final HashMap<int, T> _cache = HashMap<int, T>();
   final Set<int> _pagesLoading = Set<int>();
   final HashMap<int, Completer<T>> _completers = HashMap<int, Completer<T>>();
-  final int pageSize;
-  final ErrorListener onError;
-  int _totalCount;
+  final int? pageSize;
+  final ErrorListener? onError;
+  int? _totalCount;
 
   Repository({this.pageSize, this.onError}) {
     assert(pageSize != null);
@@ -18,7 +18,7 @@ abstract class Repository<T> {
   }
 
   /// The total number of values available.
-  int get totalCount => _totalCount;
+  int? get totalCount => _totalCount;
 
   /// Asynchronously retrieves the value at specified index. When not available in local cache
   /// the page containing the value is retrieved.
@@ -26,7 +26,7 @@ abstract class Repository<T> {
     assert(index != null);
     // index must within bounds, or 0 if totalCount is null
     assert(
-        _totalCount == null && index == 0 || index >= 0 && index < _totalCount);
+        _totalCount == null && index == 0 || index >= 0 && index < _totalCount!);
 
     final value = _cache[index];
 
@@ -35,7 +35,7 @@ abstract class Repository<T> {
       return Future.value(value);
     }
 
-    final page = index ~/ pageSize;
+    final page = index ~/ pageSize!;
 
     // value is not available, retrieve page
     if (!_pagesLoading.contains(page)) {
@@ -55,7 +55,7 @@ abstract class Repository<T> {
     return completer.future;
   }
 
-  void _onPageRetrieved(Page<T> page) {
+  void _onPageRetrieved(Page<T?> page) {
     _pagesLoading.remove(page);
     _totalCount = page.totalCount;
 
@@ -66,9 +66,9 @@ abstract class Repository<T> {
     } else {
       for (var i = 0; i < page.values.length; i++) {
         // store value
-        final index = page.page * pageSize + i;
+        final index = page.page * pageSize! + i;
         final value = page.values[i];
-        _cache[index] = value;
+        _cache[index] = value!;
 
         // complete optional completer
         final completer = _completers.remove(index);
@@ -81,14 +81,14 @@ abstract class Repository<T> {
     _pagesLoading.remove(page);
 
     // complete completers of this page with an error
-    for (var i = 0; i < pageSize; i++) {
-      final index = page * pageSize + i;
+    for (var i = 0; i < pageSize!; i++) {
+      final index = page * pageSize! + i;
       final completer = _completers.remove(index);
       completer?.completeError(error, stackTrace);
     }
   }
 
-  Future<Page<T>> getPage(int page);
+  Future<Page<T?>> getPage(int page);
 }
 
 /// Represents a page of values.
