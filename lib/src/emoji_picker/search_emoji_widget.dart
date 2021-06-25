@@ -241,7 +241,6 @@ class _EmojiSearchViewState extends State<EmojiSearchView> {
                         name: recommended.name, emoji: recommended.emoji));
                   },
                 ));
-                break;
               case ButtonMode.CUPERTINO:
                 return Center(
                     child: CupertinoButton(

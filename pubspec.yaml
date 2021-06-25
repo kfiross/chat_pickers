@@ -19,7 +19,7 @@ dependencies:
 
   # base package implementation of choosing emojies on each platform
 #  emoji_picker: ^0.1.0   # native-no-nullsafty
-  emoji_picker_flutter: ^1.0.4
+  emoji_picker_flutter: ^1.0.6
 
   flutter_hooks: ^0.16.0
   universal_io: ^2.0.4    # for work on web

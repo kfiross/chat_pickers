@@ -236,83 +236,79 @@ class _EmojiPickerState extends State<EmojiPicker> {
     List<Recommended> recommendedEmojis = [];
     _recommendedPages.clear();
 
-    if (recommendKeywords != null) {
-      Widget recommedneedPageResults;
-      if (recommendedEmojis.length != 0) {
-        recommedneedPageResults = Container(
-          color: widget.bgColor,
-          child: GridView.count(
-            shrinkWrap: true,
-            primary: true,
-            crossAxisCount: widget.columns!,
-            children: List.generate(recommendedEmojis.length, (index) {
-              if (index < recommendedEmojis.length) {
-                switch (widget.buttonMode) {
-                  case ButtonMode.MATERIAL:
-                    return Center(
-                        child: FlatButton(
-                      padding: EdgeInsets.all(0),
-                      child: Center(
-                        child: Text(
-                          recommendedEmojis[index].emoji!,
-                          style: TextStyle(fontSize: 24),
-                        ),
+    Widget recommedneedPageResults;
+    if (recommendedEmojis.length != 0) {
+      recommedneedPageResults = Container(
+        color: widget.bgColor,
+        child: GridView.count(
+          shrinkWrap: true,
+          primary: true,
+          crossAxisCount: widget.columns!,
+          children: List.generate(recommendedEmojis.length, (index) {
+            if (index < recommendedEmojis.length) {
+              switch (widget.buttonMode) {
+                case ButtonMode.MATERIAL:
+                  return Center(
+                      child: FlatButton(
+                    padding: EdgeInsets.all(0),
+                    child: Center(
+                      child: Text(
+                        recommendedEmojis[index].emoji!,
+                        style: TextStyle(fontSize: 24),
                       ),
-                      onPressed: () {
-                        Recommended recommended = recommendedEmojis[index];
-                        widget.onEmojiSelected(
-                            Emoji(
-                                name: recommended.name,
-                                emoji: recommended.emoji),
-                            selectedCategory);
-                        addRecentEmoji(Emoji(
-                            name: recommended.name, emoji: recommended.emoji));
-                      },
-                    ));
-                    break;
-                  case ButtonMode.CUPERTINO:
-                    return Center(
-                        child: CupertinoButton(
-                      pressedOpacity: 0.4,
-                      padding: EdgeInsets.all(0),
-                      child: Center(
-                        child: Text(
-                          recommendedEmojis[index].emoji!,
-                          style: TextStyle(fontSize: 24),
-                        ),
-                      ),
-                      onPressed: () {
-                        Recommended recommended = recommendedEmojis[index];
-                        widget.onEmojiSelected(
-                            Emoji(
-                                name: recommended.name,
-                                emoji: recommended.emoji),
-                            selectedCategory);
-                        addRecentEmoji(Emoji(
-                            name: recommended.name, emoji: recommended.emoji));
-                      },
-                    ));
+                    ),
+                    onPressed: () {
+                      Recommended recommended = recommendedEmojis[index];
+                      widget.onEmojiSelected(
+                          Emoji(
+                              name: recommended.name,
+                              emoji: recommended.emoji),
+                          selectedCategory);
+                      addRecentEmoji(Emoji(
+                          name: recommended.name, emoji: recommended.emoji));
+                    },
+                  ));
 
-                    break;
-                  default:
-                    return Container();
-                    break;
-                }
-              } else {
-                return Container();
+                case ButtonMode.CUPERTINO:
+                  return Center(
+                      child: CupertinoButton(
+                    pressedOpacity: 0.4,
+                    padding: EdgeInsets.all(0),
+                    child: Center(
+                      child: Text(
+                        recommendedEmojis[index].emoji!,
+                        style: TextStyle(fontSize: 24),
+                      ),
+                    ),
+                    onPressed: () {
+                      Recommended recommended = recommendedEmojis[index];
+                      widget.onEmojiSelected(
+                          Emoji(
+                              name: recommended.name,
+                              emoji: recommended.emoji),
+                          selectedCategory);
+                      addRecentEmoji(Emoji(
+                          name: recommended.name, emoji: recommended.emoji));
+                    },
+                  ));
+                default:
+                  return Container();
               }
-            }),
-          ),
-        );
-      } else {
-        recommedneedPageResults = Container(
-            color: widget.bgColor,
-            child: Center(
-                child: Text(
-              widget.noRecommendationsText,
-              style: widget.noRecommendationsStyle,
-            )));
-      }
+            } else {
+              return Container();
+            }
+          }),
+        ),
+      );
+    } else {
+      recommedneedPageResults = Container(
+          color: widget.bgColor,
+          child: Center(
+              child: Text(
+            widget.noRecommendationsText,
+            style: widget.noRecommendationsStyle,
+          )));
+    }
 //      var recommedneedPage = Column(
 //        children: <Widget>[
 //          Expanded(child: recommedneedPageResults),
@@ -324,26 +320,25 @@ class _EmojiPickerState extends State<EmojiPicker> {
 //        ],
 //      );
 
-      _recommendedPages.add(Container(
-          child: EmojiSearchView(
-        allEmojis: allEmojis,
-        allNames: allNames,
-        numRecommended: widget.numRecommended,
-        buttonMode: widget.buttonMode,
-        onEmojiSelected: widget.onEmojiSelected,
-        addRecentEmoji: addRecentEmoji,
-        selectedCategory: selectedCategory,
-        bgColor: widget.bgColor,
-        columns: widget.columns,
-      )));
+    _recommendedPages.add(Container(
+        child: EmojiSearchView(
+      allEmojis: allEmojis,
+      allNames: allNames,
+      numRecommended: widget.numRecommended,
+      buttonMode: widget.buttonMode,
+      onEmojiSelected: widget.onEmojiSelected,
+      addRecentEmoji: addRecentEmoji,
+      selectedCategory: selectedCategory,
+      bgColor: widget.bgColor,
+      columns: widget.columns,
+    )));
 
-      if (pages.isNotEmpty)
-        setState(() {
-          pages[0] = _recommendedPages[0];
-        });
-      else {
-        pages.add(_recommendedPages[0]);
-      }
+    if (pages.isNotEmpty)
+      setState(() {
+        pages[0] = _recommendedPages[0];
+      });
+    else {
+      pages.add(_recommendedPages[0]);
     }
   }
 
@@ -606,7 +601,6 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
               case ButtonMode.CUPERTINO:
                 return Center(
                     child: CupertinoButton(
@@ -626,7 +620,6 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
               default:
                 return Container();
             }
@@ -666,7 +659,6 @@ class _EmojiPickerState extends State<EmojiPicker> {
                         selectedCategory);
                   },
                 ));
-                break;
               case ButtonMode.CUPERTINO:
                 return Center(
                     child: CupertinoButton(
